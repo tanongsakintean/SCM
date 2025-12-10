@@ -1,3 +1,11 @@
+<?php
+session_start();
+if (isset($_GET['logout'])) {
+    session_destroy();
+    unset($_SESSION['user_id']);
+    unset($_SESSION['role']);
+}
+?>
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -26,9 +34,11 @@
                 <button type="submit" class="btn-login">เข้าสู่ระบบ</button>
             </form>
 
-            <div class="error-message">
+            <?php if(isset($_GET['error'])): ?>
+            <div class="error-message" style="display: block;">
                 ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง กรุณาลองอีกครั้ง
             </div>
+            <?php endif; ?>
 
             <a href="forgotpassword.php" class="forgot-password">ลืมรหัสผ่าน?</a>
         </div>

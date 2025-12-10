@@ -2,7 +2,7 @@
 $servername = "db"; // Docker service name usually
 $username = "root";
 $password = "root";
-$dbname = "scm_db";
+$dbname = "DB_SCM";
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
