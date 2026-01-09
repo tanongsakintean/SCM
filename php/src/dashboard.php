@@ -1,11 +1,22 @@
+<?php
+include 'connect.php';
 
+// Fetch System Credit Balance (User ID 1)
+$sql = "SELECT credit_balance FROM credit_setting WHERE user_id = 1";
+$result = $conn->query($sql);
+$credit_balance = 0;
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $credit_balance = $row['credit_balance'];
+}
+?>
 
 <div class="content-body">
     <div class="dashboard-grid">
         <!-- Card 1: SMS Credit -->
         <div class="card">
             <div class="card-title">เครดิต SMS ปัจจุบัน</div>
-            <div class="card-value">55,200</div>
+            <div class="card-value"><?php echo number_format($credit_balance); ?></div>
             <div class="card-footer">เครดิตขั้นต่ำ: 10,000</div>
         </div>
 
