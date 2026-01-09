@@ -13,6 +13,7 @@ if (isset($_GET['logout'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - SMS</title>
     <link rel="stylesheet" href="assets/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
@@ -40,9 +41,21 @@ if (isset($_GET['logout'])) {
             </div>
             <?php endif; ?>
 
-            <a href="forgotpassword.php" class="forgot-password">ลืมรหัสผ่าน?</a>
+            <a href="forgot_password.php" class="forgot-password">ลืมรหัสผ่าน?</a>
         </div>
     </div>
+
+    <?php if(isset($_GET['success'])): ?>
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'สำเร็จ!',
+            text: '<?php echo htmlspecialchars($_GET['success']); ?>',
+            confirmButtonText: 'ตกลง',
+            confirmButtonColor: '#28a745'
+        });
+    </script>
+    <?php endif; ?>
 
 </body>
 </html>

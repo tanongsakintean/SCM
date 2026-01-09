@@ -20,6 +20,10 @@ $result_agents = $conn->query($sql_agents);
 
 // Determine active tab
 $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'user';
+
+// Fetch Roles
+$sql_roles = "SELECT * FROM roles ORDER BY role_id ASC";
+$result_roles = $conn->query($sql_roles);
 ?>
 <div class="content-body">
     <div class="card" style="max-width: 900px; padding: 0 0 0 0; overflow: hidden; background-color: #f7f9fc; border: none; box-shadow: none;">
@@ -46,6 +50,9 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'user';
             </li>
             <li class="nav-item">
                 <a class="nav-link <?php echo $active_tab == 'supplier' ? 'active' : ''; ?>" href="#" onclick="switchTab('supplier')">ซัพพลายเออร์</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo $active_tab == 'role' ? 'active' : ''; ?>" href="#" onclick="switchTab('role')">สิทธิ์ (Roles)</a>
             </li>
         </ul>
 
@@ -89,7 +96,7 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'user';
                                     <td><span class="badge-role <?php echo $roleClass; ?>"><?php echo $row['role'] ?? 'User'; ?></span></td>
                                     <td>
                                         <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px; margin-right: 5px;" onclick="openEditUserModal(<?php echo $userData; ?>)">แก้ไข</button>
-                                        <button class="btn-warning" style="padding: 4px 10px; font-size: 12px; margin-right: 5px; color: #fff; background-color: #ffc107; border: none; cursor: pointer;" onclick="openPermissionModal(<?php echo $userData; ?>)">สิทธิ์</button>
+                                        <button class="btn-warning" style="padding: 4px 10px; font-size: 12px; margin-right: 5px; color: #fff; background-color: #ffc107; border: none; cursor: pointer;" onclick="openPermissionModal(<?php echo $row['user_id']; ?>, '<?php echo $row['role'] ?? ''; ?>')">สิทธิ์</button>
                                         <button class="btn-danger" style="padding: 4px 10px; font-size: 12px;" onclick="confirmDeleteUser(<?php echo $row['user_id']; ?>, '<?php echo $row['username']; ?>')">ลบ</button>
                                     </td>
                                 </tr>
@@ -186,6 +193,57 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'user';
                             <?php endwhile; ?>
                         <?php else: ?>
                             <tr><td colspan="4" class="text-center">ไม่พบข้อมูลซัพพลายเออร์</td></tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Role Section -->
+        <div id="role-section" style="display: <?php echo $active_tab == 'role' ? 'block' : 'none'; ?>;">
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <button class="btn-toolbar" onclick="openAddRoleModal()">เพิ่มสิทธิ์</button>
+                <div class="search-container">
+                    <input type="text" id="roleSearchInput" class="search-input" placeholder="ค้นหาสิทธิ์" onkeyup="filterTable('roleSearchInput', 'roleTableBody')">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+            </div>
+
+            <!-- Roles Table -->
+            <div style="background-color: white; border-radius: 8px; border: 1px solid #ddd; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                <table class="table" style="margin-top: 0;">
+                    <thead>
+                        <tr>
+                            <th>ชื่อสิทธิ์ (ID)</th>
+                            <!-- <th>ชื่อที่แสดง (Label)</th> Removed -->
+                            <th>จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="roleTableBody">
+                        <?php 
+                        if ($result_roles && $result_roles->num_rows > 0): 
+                            // Reset pointer just in case
+                            $result_roles->data_seek(0);
+                            while($row = $result_roles->fetch_assoc()): 
+                                $roleData = htmlspecialchars(json_encode($row), ENT_QUOTES, 'UTF-8');
+                        ?>
+                                <tr>
+                                    <td>
+                                        <?php echo $row['role_name']; ?>
+                                        <?php if(isset($row['is_default']) && $row['is_default'] == 1): ?>
+                                            <span class="badge badge-success" style="background-color: #28a745; color: white; padding: 2px 6px; font-size: 10px; border-radius: 4px; margin-left: 5px;">Default</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <!-- <td><?php echo $row['role_label']; ?></td> Removed -->
+                                    <td>
+                                        <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px; margin-right: 5px;" onclick="openEditRoleModal(<?php echo $roleData; ?>)">แก้ไข</button>
+                                        <button class="btn-danger" style="padding: 4px 10px; font-size: 12px;" onclick="confirmDeleteRole(<?php echo $row['role_id']; ?>, '<?php echo $row['role_name']; ?>')">ลบ</button>
+                                    </td>
+                                </tr>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <tr><td colspan="3" class="text-center">ไม่พบข้อมูลสิทธิ์</td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
@@ -318,9 +376,14 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'user';
                 <div class="form-group" style="margin-bottom: 15px;">
                     <label class="form-label">เลือกสิทธิ์ (Role)</label>
                     <select name="permission_name" id="perm_role" class="form-control">
-                        <option value="Admin">ผู้ดูแลระบบ (Admin)</option>
-                        <option value="Staff">พนักงาน (Staff)</option>
-                        <option value="Manager">ผู้บริหาร (Manager)</option>
+                        <?php 
+                        if ($result_roles->num_rows > 0) {
+                            $result_roles->data_seek(0); // Reset pointer
+                            while($role = $result_roles->fetch_assoc()) {
+                                echo '<option value="'.$role['role_name'].'">'.$role['role_name'].'</option>';
+                            }
+                        }
+                        ?>
                     </select>
                 </div>
                  <div class="modal-footer" style="padding: 10px 0 0; justify-content: flex-end;">
@@ -452,6 +515,65 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'user';
 
 
 
+<!-- Modal Overlay: Add Role -->
+<div class="modal-overlay" id="addRoleModal" style="display: none;">
+    <div class="modal-box" style="width: 500px; text-align: left;">
+        <div class="modal-header" style="border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px;">
+            เพิ่มสิทธิ์ใหม่
+        </div>
+        <div class="modal-body" style="padding: 0 30px 20px;">
+            <form action="action/role_create_db.php" method="post">
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label class="form-label">ชื่อสิทธิ์ (ID - ภาษาอังกฤษ)</label>
+                    <input type="text" name="role_name" class="form-control" required placeholder="Ex: Admin, Manager">
+                </div>
+                <!-- role_label removed -->
+                
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label class="checkbox-container" style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" name="is_default" value="1" style="width: auto; margin-right: 10px;">
+                        <span style="font-size: 14px;">ตั้งเป็นสิทธิ์เริ่มต้น (Set as Default)</span>
+                    </label>
+                </div>
+                 <div class="modal-footer" style="padding: 10px 0 0; justify-content: flex-end;">
+                    <button type="button" class="btn-secondary" onclick="closeAddRoleModal()" style="margin-right: 10px;">ยกเลิก</button>
+                    <button type="submit" class="btn-primary">บันทึก</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Overlay: Edit Role -->
+<div class="modal-overlay" id="editRoleModal" style="display: none;">
+    <div class="modal-box" style="width: 500px; text-align: left;">
+        <div class="modal-header" style="border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px;">
+            แก้ไขข้อมูลสิทธิ์
+        </div>
+        <div class="modal-body" style="padding: 0 30px 20px;">
+            <form action="action/role_update_db.php" method="post">
+                <input type="hidden" name="role_id" id="edit_role_id">
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label class="form-label">ชื่อสิทธิ์ (ID - ภาษาอังกฤษ)</label>
+                    <input type="text" name="role_name" id="edit_role_name" class="form-control" required>
+                </div>
+                <!-- role_label removed -->
+                
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label class="checkbox-container" style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" name="is_default" id="edit_is_default" value="1" style="width: auto; margin-right: 10px;">
+                        <span style="font-size: 14px;">ตั้งเป็นสิทธิ์เริ่มต้น (Set as Default)</span>
+                    </label>
+                </div>
+                 <div class="modal-footer" style="padding: 10px 0 0; justify-content: flex-end;">
+                    <button type="button" class="btn-secondary" onclick="closeEditRoleModal()" style="margin-right: 10px;">ยกเลิก</button>
+                    <button type="submit" class="btn-primary">บันทึกการแก้ไข</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
     // Tab Switching
     function switchTab(tabName) {
@@ -459,6 +581,7 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'user';
         document.getElementById('user-section').style.display = 'none';
         document.getElementById('customer-section').style.display = 'none';
         document.getElementById('supplier-section').style.display = 'none';
+        document.getElementById('role-section').style.display = 'none';
         
         // Remove active class from all tabs
         const navLinks = document.querySelectorAll('.nav-link');
@@ -474,6 +597,9 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'user';
         } else if (tabName === 'supplier') {
             document.getElementById('supplier-section').style.display = 'block';
             navLinks[2].classList.add('active');
+        } else if (tabName === 'role') {
+            document.getElementById('role-section').style.display = 'block';
+            navLinks[3].classList.add('active');
         }
     }
 
@@ -507,9 +633,9 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'user';
     }
     function closeEditUserModal() { document.getElementById('editUserModal').style.display = 'none'; }
     
-    function openPermissionModal(user) {
-        document.getElementById('perm_user_id').value = user.user_id;
-        document.getElementById('perm_role').value = user.role || 'Staff'; 
+    function openPermissionModal(userId, role) {
+        document.getElementById('perm_user_id').value = userId;
+        document.getElementById('perm_role').value = role || 'Staff'; 
         document.getElementById('permissionModal').style.display = 'flex';
     }
     function closePermissionModal() { document.getElementById('permissionModal').style.display = 'none'; }
@@ -565,6 +691,34 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'user';
     function closeEditAgentModal() { document.getElementById('editAgentModal').style.display = 'none'; }
 
 
+    // --- Role Functions ---
+    function confirmDeleteRole(id, name) {
+        Swal.fire({
+            title: 'ยืนยันการลบ?',
+            text: "คุณต้องการลบสิทธิ์ " + name + " หรือไม่?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'ลบข้อมูล'
+        }).then((result) => {
+            if (result.isConfirmed) window.location.href = 'action/role_delete_db.php?id=' + id;
+        })
+    }
+    function openAddRoleModal() { document.getElementById('addRoleModal').style.display = 'flex'; }
+    function closeAddRoleModal() { document.getElementById('addRoleModal').style.display = 'none'; }
+    function openEditRoleModal(data) {
+        document.getElementById('edit_role_id').value = data.role_id;
+        document.getElementById('edit_role_name').value = data.role_name;
+        // document.getElementById('edit_role_label').value = data.role_label; // Removed
+        
+        var isDefault = data.is_default == 1; 
+        document.getElementById('edit_is_default').checked = isDefault;
+
+        document.getElementById('editRoleModal').style.display = 'flex';
+    }
+    function closeEditRoleModal() { document.getElementById('editRoleModal').style.display = 'none'; }
+
+
 
     // Close modals when clicking outside
     window.onclick = function(event) {
@@ -575,6 +729,8 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'user';
         if (event.target == document.getElementById('addAgentModal')) closeAddAgentModal();
         if (event.target == document.getElementById('editAgentModal')) closeEditAgentModal();
         if (event.target == document.getElementById('permissionModal')) closePermissionModal();
+        if (event.target == document.getElementById('addRoleModal')) closeAddRoleModal();
+        if (event.target == document.getElementById('editRoleModal')) closeEditRoleModal();
     }
 
     // Search Function

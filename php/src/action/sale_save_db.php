@@ -43,7 +43,12 @@ try {
     // 3. Deduct from Admin's Credit
     $stmt2 = $conn->prepare("UPDATE credit_setting SET credit_balance = credit_balance - ? WHERE user_id = 1");
     $stmt2->bind_param("i", $sale_credit);
-    if (!$stmt2->execute()) throw new Exception("Failed to update credit balance.");
+    if (!$stmt2->execute()) throw new Exception("Failed to update system credit balance.");
+
+    // 4. ADD to Customer's Credit
+    $stmt3 = $conn->prepare("UPDATE customer SET credit_balance = credit_balance + ? WHERE customer_id = ?");
+    $stmt3->bind_param("ii", $sale_credit, $customer_id);
+    if (!$stmt3->execute()) throw new Exception("Failed to update customer credit balance.");
 
     $conn->commit();
     header("Location: ../index.php?p=sales&success=1");

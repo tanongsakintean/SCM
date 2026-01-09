@@ -48,8 +48,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             
     if ($conn->query($sql) === TRUE) {
         $last_id = $conn->insert_id;
-        // Default role: User
-        $sql_perm = "INSERT INTO permission (user_id, permission_name) VALUES ('$last_id', 'User')";
+        $last_id = $conn->insert_id;
+        
+        // Fetch default role
+        $role_name = 'User'; // Fallback
+        $default_role_result = $conn->query("SELECT role_name FROM roles WHERE is_default = 1 LIMIT 1");
+        if ($default_role_result && $default_role_result->num_rows > 0) {
+            $default_role = $default_role_result->fetch_assoc();
+            $role_name = $default_role['role_name'];
+        }
+
+        $sql_perm = "INSERT INTO permission (user_id, permission_name) VALUES ('$last_id', '$role_name')";
         $conn->query($sql_perm);
         
         header("Location: ../index.php?p=users&success=เพิ่มผู้ใช้สำเร็จ");

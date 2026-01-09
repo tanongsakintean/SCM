@@ -23,16 +23,19 @@ $current_min = $setting['credit_min'] ?? 10000;
              </div>
         </div>
         
+        <?php 
+        $channels = explode(',', $setting['notify_channels'] ?? 'dashboard');
+        ?>
         <form action="action/setting_update_db.php" method="post">
             <!-- Form Group 1: Credit Limit -->
             <div class="form-group" style="margin-bottom: 40px;">
                 <label class="form-label" style="font-size: 16px; color: #555; margin-bottom: 10px;">เกณฑ์เครดิตขั้นต่ำ</label>
                 <div style="display: flex; align-items: center; gap: 15px;">
-                    <input type="text" name="credit_min" 
-                           value="<?php echo number_format($current_min); ?>" 
+                    <input type="number" name="credit_min" 
+                           value="<?php echo $current_min; ?>" 
                            class="form-control" 
                            style="width: 250px; font-size: 24px; font-weight: 600; padding: 10px 15px; height: auto;" 
-                           required>
+                           min="0" required>
                     
                     <?php if(isset($_GET['success'])): ?>
                         <div style="
@@ -49,6 +52,21 @@ $current_min = $setting['credit_min'] ?? 10000;
                             <i class="fas fa-check-circle" style="margin-right: 8px;"></i> บันทึกเรียบร้อยแล้ว!
                         </div>
                     <?php endif; ?>
+                    <?php if(isset($_GET['error'])): ?>
+                        <div style="
+                            background-color: #dc3545; 
+                            color: white; 
+                            padding: 8px 15px; 
+                            border-radius: 6px; 
+                            font-size: 16px; 
+                            font-weight: 500;
+                            display: flex; 
+                            align-items: center;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                        ">
+                            <i class="fas fa-exclamation-circle" style="margin-right: 8px;"></i> <?php echo htmlspecialchars($_GET['error']); ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -58,15 +76,28 @@ $current_min = $setting['credit_min'] ?? 10000;
                 
                 <div style="margin-bottom: 15px;">
                     <label class="custom-checkbox-container" style="display: flex; align-items: center; cursor: pointer;">
-                        <input type="checkbox" checked disabled style="width: 20px; height: 20px; margin-right: 10px; cursor: pointer; accent-color: #007bff;">
+                        <input type="checkbox" name="notify_dashboard" value="1" 
+                               <?php echo in_array('dashboard', $channels) ? 'checked' : ''; ?>
+                               style="width: 20px; height: 20px; margin-right: 10px; cursor: pointer; accent-color: #007bff;">
                         <span style="font-size: 16px; color: #333;">Dashboard</span>
                     </label>
                 </div>
                 
                 <div>
                      <label class="custom-checkbox-container" style="display: flex; align-items: center; cursor: pointer;">
-                        <input type="checkbox" style="width: 20px; height: 20px; margin-right: 10px; cursor: pointer; border: 1px solid #ddd;" disabled>
+                        <input type="checkbox" name="notify_sms" value="1" 
+                               <?php echo in_array('sms', $channels) ? 'checked' : ''; ?>
+                               style="width: 20px; height: 20px; margin-right: 10px; cursor: pointer; accent-color: #007bff;">
                         <span style="font-size: 16px; color: #333;">SMS</span>
+                    </label>
+                </div>
+
+                <div style="margin-top: 15px;">
+                     <label class="custom-checkbox-container" style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" name="notify_email" value="1" 
+                               <?php echo in_array('email', $channels) ? 'checked' : ''; ?>
+                               style="width: 20px; height: 20px; margin-right: 10px; cursor: pointer; accent-color: #007bff;">
+                        <span style="font-size: 16px; color: #333;">อีเมล</span>
                     </label>
                 </div>
             </div>

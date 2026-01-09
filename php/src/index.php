@@ -11,6 +11,8 @@ if (!isset($_SESSION['user_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SMS System</title>
+    <!-- Bootstrap 4 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <!-- CSS -->
     <link rel="stylesheet" href="assets/css/style.css?v=<?php echo time(); ?>">
     <!-- Font Awesome -->
@@ -19,8 +21,6 @@ if (!isset($_SESSION['user_id'])) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         /* Specific page styles that need to be global now */
-        .custom-select-wrapper { position: relative; }
-        .custom-select-wrapper::after { content: '\f107'; font-family: 'Font Awesome 5 Free'; font-weight: 900; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #888; pointer-events: none; }
         .input-group-text { display: flex; align-items: center; font-size: 14px; color: #888; margin-top: 5px; } 
         .input-group-text i { margin-right: 5px; }
         .filter-group-label { font-size: 14px; color: #888; margin-bottom: 8px; }
@@ -96,6 +96,11 @@ if (!isset($_SESSION['user_id'])) {
             ?>
         </div>
     </div>
+
+    <!-- jQuery, Popper.js, Bootstrap 4 JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
 
     <!-- Modals that need to be available globally or per page -->
    

@@ -30,19 +30,20 @@ $current_credit = $credit_row['credit_balance'] ?? 0;
             <!-- Customer Selection Row -->
             <div class="form-group" style="margin-bottom: 2rem;">
                 <div style="display: flex; gap: 15px;">
-                    <div style="flex-grow: 1;" class="custom-select-wrapper">
+                <div style="flex-grow: 1;" class="custom-select-wrapper">
                         <select name="customer_id" class="form-control" required>
                             <option value="">เลือกลูกค้า</option>
                             <?php 
                             if ($customers_result->num_rows > 0) {
                                 while($cust = $customers_result->fetch_assoc()) {
-                                    echo '<option value="'.$cust['customer_id'].'">'.$cust['customer_name'].'</option>';
+                                    $balance_text = $cust['credit_balance'] > 0 ? " (เครดิต: " . number_format($cust['credit_balance']) . ")" : "";
+                                    echo '<option value="'.$cust['customer_id'].'">'.$cust['customer_name'] . $balance_text . '</option>';
                                 }
                             }
                             ?>
                         </select>
                     </div>
-                    <button type="button" class="btn-primary" style="white-space: nowrap; padding: 10px 30px;">เพิ่มลูกค้าใหม่</button>
+                    <button type="button" class="btn-primary" style="white-space: nowrap; padding: 10px 30px;" onclick="$('#addCustomerModal').modal('show')">เพิ่มลูกค้าใหม่</button>
                 </div>
             </div>
 
@@ -104,6 +105,40 @@ $current_credit = $credit_row['credit_balance'] ?? 0;
     </div>
 </div>
 
+<!-- Add Customer Modal -->
+<div class="modal fade" id="addCustomerModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content" style="border: none; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+            <div class="modal-header" style="border-bottom: 1px solid #f0f0f0; padding: 20px;">
+                <h5 class="modal-title" style="font-weight: 600; color: #333;"><i class="fas fa-user-plus" style="color: #0066ff; margin-right: 10px;"></i> เพิ่มลูกค้าใหม่</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="action/add_customer_db.php" method="post">
+                <div class="modal-body" style="padding: 25px;">
+                    <div class="form-group">
+                        <label>ชื่อลูกค้า <span class="text-danger">*</span></label>
+                        <input type="text" name="customer_name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>เบอร์โทรศัพท์ <span class="text-danger">*</span></label>
+                        <input type="text" name="customer_phone" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>อีเมล</label>
+                        <input type="email" name="customer_email" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer" style="background-color: #f8f9fa; border-top: 1px solid #eee; padding: 15px 25px; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">ยกเลิก</button>
+                    <button type="submit" class="btn btn-primary">บันทึก</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
 function calculateTotal() {
     const credit = parseFloat(document.getElementById('sale_credit').value) || 0;
@@ -112,5 +147,16 @@ function calculateTotal() {
     
     document.getElementById('totalDisplay').innerText = total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     document.getElementById('sale_amount').value = total.toFixed(2);
+}
+
+// Check for success add param
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.has('success_add')) {
+    Swal.fire({
+        icon: 'success',
+        title: 'เพิ่มลูกค้าสำเร็จ',
+        showConfirmButton: false,
+        timer: 1500
+    });
 }
 </script>
