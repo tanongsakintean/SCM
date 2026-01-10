@@ -27,8 +27,8 @@ $sale_date = date("Y-m-d");
 $conn->begin_transaction();
 
 try {
-    // 1. Check Admin Credit Balance (User ID 1)
-    $res = $conn->query("SELECT credit_balance FROM credit_setting WHERE user_id = 1 FOR UPDATE");
+    // 1. Check Admin Credit Balance (User ID 2)
+    $res = $conn->query("SELECT credit_balance FROM credit_setting WHERE user_id = 2 FOR UPDATE");
     $admin_row = $res->fetch_assoc();
     
     if (!$admin_row || $admin_row['credit_balance'] < $sale_credit) {
@@ -41,7 +41,7 @@ try {
     if (!$stmt1->execute()) throw new Exception("Failed to record sale.");
 
     // 3. Deduct from Admin's Credit
-    $stmt2 = $conn->prepare("UPDATE credit_setting SET credit_balance = credit_balance - ? WHERE user_id = 1");
+    $stmt2 = $conn->prepare("UPDATE credit_setting SET credit_balance = credit_balance - ? WHERE user_id = 2");
     $stmt2->bind_param("i", $sale_credit);
     if (!$stmt2->execute()) throw new Exception("Failed to update system credit balance.");
 
