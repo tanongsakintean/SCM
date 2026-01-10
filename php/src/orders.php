@@ -93,6 +93,7 @@ $orders_result = $conn->query($sql_orders);
                         <th style="width: 15%;">วันที่สั่งซื้อ</th>
                         <th style="width: 15%;">ชื่อผู้ที่ออกใบคำสั่งซื้อ</th>
                         <th style="width: 15%;">สถานะ</th>
+                        <th style="width: 10%;">ดำเนินการ</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -123,6 +124,7 @@ $orders_result = $conn->query($sql_orders);
                                        data-quantity="<?php echo number_format($row['order_quantity']); ?>"
                                        data-date="<?php echo date('d/m/Y H:i', strtotime($row['order_date'])); ?>"
                                        data-status="<?php echo $status_text; ?>"
+                                       data-raw-status="<?php echo $row['order_status']; ?>"
                                        data-note="<?php echo htmlspecialchars($row['order_note'] ?? '-'); ?>"
                                        data-attachment="<?php echo htmlspecialchars($row['order_attachment'] ?? ''); ?>"
                                        data-receipt="<?php echo !empty($row['receipt_proof']) ? 'assets/uploads/' . htmlspecialchars($row['receipt_proof']) : ''; ?>"
@@ -142,6 +144,13 @@ $orders_result = $conn->query($sql_orders);
                                 </td>
                                 <td><?php echo $row['requester_name']; ?></td>
                                 <td><span class="status-badge <?php echo $status_class; ?>"><?php echo $status_text; ?></span></td>
+                                <td>
+                                    <?php if($row['order_status'] == 'Approved' || $row['order_status'] == 'Received'): ?>
+                                        <a href="print_order.php?id=<?php echo $row['order_id']; ?>" target="_blank" class="btn btn-sm btn-outline-info" title="พิมพ์ใบสั่งซื้อ">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                    <?php endif; ?>
+                                </td>
                             </tr>
                         <?php endwhile; ?>
                     <?php else: ?>
@@ -228,6 +237,7 @@ function viewOrderDetails(element) {
     const quantity = element.getAttribute('data-quantity');
     const date = element.getAttribute('data-date');
     const status = element.getAttribute('data-status');
+    const rawStatus = element.getAttribute('data-raw-status');
     const note = element.getAttribute('data-note');
     const attachment = element.getAttribute('data-attachment');
     const receipt = element.getAttribute('data-receipt');
@@ -267,6 +277,13 @@ function viewOrderDetails(element) {
     const printBtn = document.getElementById('btn_print_po');
     if (printBtn) {
         printBtn.href = 'print_order.php?id=' + realId;
+        
+        // Only allow printing if Approved or Received
+        if (rawStatus === 'Approved' || rawStatus === 'Received') {
+            printBtn.style.display = 'inline-block';
+        } else {
+            printBtn.style.display = 'none';
+        }
     }
     
     // Show Modal
@@ -284,17 +301,9 @@ function viewOrderDetails(element) {
             text: 'คำสั่งซื้อของคุณถูกส่งเข้าสู่ระบบแล้ว',
             confirmButtonText: 'ตกลง',
             confirmButtonColor: '#0066ff',
-            showCancelButton: true,
-            cancelButtonText: 'พิมพ์ใบสั่งซื้อ',
-            cancelButtonColor: '#17a2b8'
+            showCancelButton: false
         }).then((result) => {
             if (result.isConfirmed) {
-                window.history.replaceState(null, null, window.location.pathname + '?p=orders');
-            } else if (result.dismiss === Swal.DismissReason.cancel) {
-                // Open Print Page
-                <?php if(isset($_GET['order_id'])): ?>
-                    window.open('print_order.php?id=<?php echo $_GET['order_id']; ?>', '_blank');
-                <?php endif; ?>
                 window.history.replaceState(null, null, window.location.pathname + '?p=orders');
             }
         });
