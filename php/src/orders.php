@@ -105,11 +105,13 @@ $orders_result = $conn->query($sql_orders);
                                 elseif ($row['order_status'] == 'Approved') $status_class = 'status-approved';
                                 elseif ($row['order_status'] == 'Rejected') $status_class = 'status-rejected';
                                 elseif ($row['order_status'] == 'Received') $status_class = 'status-received';
+                                elseif ($row['order_status'] == 'Cancelled') $status_class = 'status-rejected'; // Use rejected style for cancelled
 
                                 if ($row['order_status'] == 'Pending') $status_text = 'รอดำเนินการ';
                                 elseif ($row['order_status'] == 'Approved') $status_text = 'อนุมัติแล้ว';
                                 elseif ($row['order_status'] == 'Rejected') $status_text = 'ถูกปฏิเสธ';
                                 elseif ($row['order_status'] == 'Received') $status_text = 'ได้รับเครดิตแล้ว';
+                                elseif ($row['order_status'] == 'Cancelled') $status_text = 'ยกเลิกแล้ว';
                                 
                                 $display_id = !empty($row['order_number']) ? $row['order_number'] : str_pad($row['order_id'], 5, '0', STR_PAD_LEFT);
                             ?>
@@ -149,6 +151,12 @@ $orders_result = $conn->query($sql_orders);
                                         <a href="print_order.php?id=<?php echo $row['order_id']; ?>" target="_blank" class="btn btn-sm btn-outline-info" title="พิมพ์ใบสั่งซื้อ">
                                             <i class="fas fa-print"></i>
                                         </a>
+                                    <?php endif; ?>
+                                    
+                                    <?php if($row['order_status'] == 'Pending'): ?>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="cancelOrder(<?php echo $row['order_id']; ?>, '<?php echo $display_id; ?>')" title="ยกเลิกคำสั่งซื้อ">
+                                            <i class="fas fa-times"></i>
+                                        </button>
                                     <?php endif; ?>
                                 </td>
                             </tr>
@@ -289,6 +297,50 @@ function viewOrderDetails(element) {
     // Show Modal
     $('#viewOrderModal').modal('show');
 }
+
+function cancelOrder(id, displayId) {
+    Swal.fire({
+        title: 'ยืนยันการยกเลิก?',
+        text: "คุณต้องการยกเลิกคำสั่งซื้อ #" + displayId + " ใช่หรือไม่?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'ใช่, ยกเลิกเดี๋ยวนี้!',
+        cancelButtonText: 'ไม่, เก็บไว้'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Create a form to submit via POST
+            var form = document.createElement("form");
+            form.setAttribute("method", "post");
+            form.setAttribute("action", "action/order_cancel_db.php");
+
+            var hiddenField = document.createElement("input");
+            hiddenField.setAttribute("type", "hidden");
+            hiddenField.setAttribute("name", "order_id");
+            hiddenField.setAttribute("value", id);
+
+            form.appendChild(hiddenField);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    })
+}
+
+// Check for cancel success
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.has('success_cancel')) {
+    Swal.fire({
+        icon: 'success',
+        title: 'ยกเลิกคำสั่งซื้อสำเร็จ',
+        showConfirmButton: false,
+        timer: 1500
+    }).then(() => {
+        // Clear param
+         window.history.replaceState(null, null, window.location.pathname + '?p=orders');
+    });
+}
+
 </script>
 
 <!-- Updating the Success Script -->

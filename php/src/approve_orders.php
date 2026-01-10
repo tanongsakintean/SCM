@@ -2,7 +2,7 @@
 include 'connect.php';
 
 // Pending Orders
-$sql_pending = "SELECT pc.*, a.agent_name, u.username as requester_name
+$sql_pending = "SELECT pc.*, a.agent_name, CONCAT(u.firstname, ' ', u.lastname) as requester_name
                 FROM purchase_credit pc 
                 JOIN agent a ON pc.agent_id = a.agent_id 
                 LEFT JOIN user u ON pc.user_id = u.user_id
@@ -123,7 +123,7 @@ $result_history = $conn->query($sql_history);
       <div class="modal-body">
         <p><strong>เลขที่ใบเสนอราคา:</strong> <span id="view_order_id"></span></p>
         <p><strong>ซัพพลายเออร์:</strong> <span id="view_agent_name"></span></p>
-        <p><strong>ชื่อ-นามสกุล:</strong> <span id="view_requester"></span></p>
+        <p><strong>ผู้สั่งซื้อ:</strong> <span id="view_requester"></span></p>
         <p><strong>ปริมาณ:</strong> <span id="view_quantity"></span></p>
         <p><strong>วันที่สั่งซื้อ:</strong> <span id="view_date"></span></p>
         <p><strong>สถานะ:</strong> <span id="view_status"></span></p>
