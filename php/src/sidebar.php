@@ -11,10 +11,13 @@ $currentPage = $_GET['p'] ?? 'dashboard';
 ?>
 <div class="sidebar">
     <div class="sidebar-header">
-        SMS
+        <div class="brand-logo">
+            <img src="assets/img/jp_logo.png" alt="JP Digital Agency" class="brand-logo">
+        </div>
+        <!-- SMS
         <div style="font-size: 0.8rem; margin-top: 5px; color: #aaa;">
             <?php echo htmlspecialchars($role); ?>
-        </div>
+        </div> -->
     </div>
     <ul class="sidebar-menu">
         <li>

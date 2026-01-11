@@ -913,3 +913,18 @@ body {
 .feed-meta i {
     margin-right: 4px;
 }
+
+/* Fixed Sidebar Logo Alignment */
+.sidebar-header div.brand-logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.sidebar-header img.brand-logo {
+    max-width: 80%;
+    height: auto;
+    display: block;
+}

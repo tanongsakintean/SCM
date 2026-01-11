@@ -1,0 +1,123 @@
+@import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap');
+
+body {
+    background-color: #F4F6F9;
+    font-family: 'Prompt', sans-serif;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 480px;
+    padding: 20px;
+}
+
+.login-card {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* Soft shadow */
+    padding: 40px;
+    text-align: center;
+    position: relative;
+    border: 1px solid #eaeaea; /* Subtle border */
+}
+
+/* Brand Section */
+.brand-icon {
+    font-size: 48px;
+    color: #007bff; /* Primary Blue */
+    margin-bottom: 10px;
+}
+
+.brand-icon i {
+    transform: rotate(-20deg); /* Tilt the paper plane slightly */
+}
+
+.brand-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #003366; /* Dark Blue */
+    margin: 0;
+    line-height: 1.2;
+}
+
+.brand-subtitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: #003366;
+    margin-bottom: 30px;
+}
+
+/* Form Styles */
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 16px;
+    border: 1px solid #ced4da;
+    border-radius: 8px; /* Slightly more rounded */
+    background-color: #fff;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    box-sizing: border-box; /* Ensure padding doesn't affect width */
+    font-family: 'Prompt', sans-serif;
+}
+
+.form-control:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.form-control::placeholder {
+    color: #aaa;
+    font-weight: 300;
+}
+
+.btn-login {
+    width: 100%;
+    background-color: #0066ff;
+    color: #fff;
+    border: none;
+    padding: 12px;
+    font-size: 18px;
+    font-weight: 500;
+    border-radius: 8px; /* Match input radius */
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-top: 10px;
+    font-family: 'Prompt', sans-serif;
+}
+
+.btn-login:hover {
+    background-color: #0056b3;
+}
+
+/* Footer Section */
+.error-message {
+    color: #dc3545;
+    margin-top: 15px;
+    font-size: 14px;
+    display: block; /* Control visibility via PHP logic, but for styling */
+}
+
+.forgot-password {
+    display: block;
+    margin-top: 20px;
+    color: #0066ff;
+    text-decoration: none;
+    font-size: 16px;
+    border-bottom: 1px solid transparent;
+    display: inline-block; /* Allow border bottom on hover */
+}
+
+.forgot-password:hover {
+    border-bottom-color: #0066ff;
+}
