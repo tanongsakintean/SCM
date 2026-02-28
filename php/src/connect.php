@@ -1,7 +1,7 @@
 <?php
-$servername = "localhost"; 
+$servername = "db"; 
 $username = "root";
-$password = "";
+$password = "root";
 $dbname = "DB_SCM";
 
 // Create connection
