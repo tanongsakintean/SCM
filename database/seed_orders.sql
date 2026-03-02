@@ -7,5 +7,5 @@ INSERT INTO `category` (`category_name`) VALUES
 -- Insert Agents
 INSERT INTO `agent` (`agent_name`, `agent_phone`, `agent_email`) VALUES
 ('ProSMS', '021111111', 'sales@prosms.com'),
-('AlphaCom', '022222222', 'contact@alphacom.com'),
+('AlphaCom', '022222223', 'contact@alphacom.com'),
 ('ThaiBulkSMS', '023333333', 'support@thaibulksms.com');

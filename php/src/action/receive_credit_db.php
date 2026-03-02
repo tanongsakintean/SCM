@@ -2,6 +2,15 @@
 session_start();
 include '../connect.php';
 
+// Set temporary upload directory to local folder since the system default one might be inaccessible
+$local_tmp = dirname(__DIR__) . '/tmp';
+if (!is_dir($local_tmp)) {
+    mkdir($local_tmp, 0777, true);
+}
+putenv('TMPDIR=' . $local_tmp);
+ini_set('sys_temp_dir', $local_tmp);
+ini_set('upload_tmp_dir', $local_tmp);
+
 // Check permissions (Staff, Admin, Manager) - Prompt says "Employee" (Staff) enters.
 // Let's allow Staff, Manager, Admin.
 if (!isset($_SESSION['user_id'])) {

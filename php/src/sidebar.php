@@ -11,8 +11,11 @@ $currentPage = $_GET['p'] ?? 'dashboard';
 ?>
 <div class="sidebar">
     <div class="sidebar-header">
-        <div class="brand-logo">
-            <img src="assets/img/jp_logo.png" alt="JP Digital Agency" class="brand-logo">
+        <div class="brand-logo-html">
+            <svg class="logo-icon" width="56" height="56" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M22.49 2.35L2.01 11.25L10.3 15.3L14.6 20.41L22.49 2.35ZM15 7.5L10.5 13H13.5L12 18L17 11.5H14L15 7.5Z" fill="white" />
+            </svg>
+            <div class="logo-text">JP Digital Agency</div>
         </div>
         <!-- SMS
         <div style="font-size: 0.8rem; margin-top: 5px; color: #aaa;">

@@ -52,7 +52,7 @@ body {
 }
 
 .sidebar-header {
-    padding: 2rem;
+    padding: 1rem;
     text-align: center;
     font-size: 24px;
     font-weight: 600;
@@ -915,16 +915,24 @@ body {
 }
 
 /* Fixed Sidebar Logo Alignment */
-.sidebar-header div.brand-logo {
+.sidebar-header .brand-logo-html {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
+    color: white;
     width: 100%;
     margin-bottom: 10px;
 }
 
-.sidebar-header img.brand-logo {
-    max-width: 80%;
-    height: auto;
-    display: block;
+.sidebar-header .logo-icon {
+    margin-bottom: 10px;
+}
+
+.sidebar-header .logo-text {
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin: 0;
+    white-space: nowrap;
 }
