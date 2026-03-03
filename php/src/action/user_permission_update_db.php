@@ -1,9 +1,10 @@
 <?php
 session_start();
-include '../connect.php';
+include '../includes/functions.php';
 
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'Admin') {
-    header("Location: ../login.php");
+if (!isset($_SESSION['user_id']) || !has_permission($_SESSION['role_id'] ?? 0, 'users')) {
+    $_SESSION['error'] = "คุณไม่มีสิทธิ์กำหนดสิทธิ์เท่านัั้น";
+    header("Location: ../index.php?p=users");
     exit();
 }
 

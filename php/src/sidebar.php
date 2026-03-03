@@ -5,7 +5,7 @@ if (session_status() == PHP_SESSION_NONE) {
 // Ensure connection and functions are available
 include_once 'connect.php';
 
-$role = $_SESSION['role'] ?? ''; 
+// Removed unused role assignment 
 $role_id = $_SESSION['role_id'] ?? 0;
 $currentPage = $_GET['p'] ?? 'dashboard'; 
 ?>

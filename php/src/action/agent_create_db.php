@@ -1,10 +1,12 @@
 <?php
 session_start();
 include '../connect.php';
+include '../includes/functions.php';
 
 // Check permissions (Admin only)
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'Admin') {
-    header("Location: ../login.php");
+if (!isset($_SESSION['user_id']) || !has_permission($_SESSION['role_id'] ?? 0, 'supplier')) {
+    $_SESSION['error'] = "คุณไม่มีสิทธิ์เพิ่มซัพพลายเออร์";
+    header("Location: ../index.php?p=users&tab=supplier");
     exit();
 }
 

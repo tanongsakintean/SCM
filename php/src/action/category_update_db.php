@@ -1,10 +1,11 @@
 <?php
 session_start();
-include '../connect.php';
+include '../includes/functions.php';
 
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'Admin') {
-    header("Location: ../login.php");
-    exit();
+if (!isset($_SESSION['user_id']) || !has_permission($_SESSION['role_id'] ?? 0, 'settings')) {
+    $_SESSION['error'] = "คุณไม่มีสิทธิ์แก้ไขหมวดหมู่";
+    header("Location: ../index.php?p=settings");
+    exit;
 }
 
 $category_id = $_POST['category_id'];

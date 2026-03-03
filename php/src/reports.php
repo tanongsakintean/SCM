@@ -114,7 +114,7 @@
 
 @media print {
     body { background-color: white !important; }
-    .sidebar, .top-navbar, .report-filters, .report-header, .btn-export, .btn-view-report, .toolbar {
+    .sidebar, .top-navbar, .report-filters, .report-header, .btn-export, .btn-view-report, .toolbar, #paginationContainer {
         display: none !important;
     }
     .content-page, .wrapper, .content-body {
@@ -124,6 +124,29 @@
         box-shadow: none !important;
         background: white !important;
     }
+    .report-table {
+        border-collapse: collapse !important;
+        border: 1px solid #333 !important;
+    }
+    .report-table th, .report-table td {
+        border: 1px solid #333 !important;
+        padding: 8px !important;
+        color: #000 !important;
+    }
+    .report-table thead th {
+        background-color: #f1f5f9 !important;
+        -webkit-print-color-adjust: exact;
+        color: #000 !important;
+    }
+    #printHeader {
+        display: block !important;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    #printHeader h2 { font-size: 22px; margin-bottom: 5px; color: #000; font-weight: bold; }
+    #printHeader p { margin: 2px 0; font-size: 14px; color: #333; }
+    #reportSummary { color: #000 !important; }
+    #reportSummary span { color: #000 !important; }
 }
 </style>
 
@@ -148,11 +171,10 @@ $agents_res = $conn->query("SELECT agent_id, agent_name FROM agent ORDER BY agen
             <div class="col-md-3 mb-3">
                 <div class="filter-label active"><span class="radio-dot"></span> เลือกประเภทธุรกรรม</div>
                 <select id="reportType" class="custom-select" onchange="toggleFilterFields()">
-                    <option value="combined">รายงานรวม (Combined)</option>
                     <option value="sales">รายงานการขาย</option>
                     <option value="orders">รายงานการสั่งซื้อ</option>
-                    <?php if ($_SESSION['role'] == 'Admin'): ?>
-                    <option value="logs">ประวัติการใช้งาน (System Logs)</option>
+                    <?php if (has_permission($_SESSION['role_id'] ?? 0, 'users')): ?>
+                        <option value="system_log">ประวัติการใช้งานระบบ (System Logs)</option>
                     <?php endif; ?>
                 </select>
             </div>
@@ -187,7 +209,6 @@ $agents_res = $conn->query("SELECT agent_id, agent_name FROM agent ORDER BY agen
                     <?php endwhile; ?>
                 </select>
             </div>
-            <?php if ($_SESSION['role'] == 'Admin' || $_SESSION['role'] == 'Manager'): ?>
             <div class="col-md-4 mb-3" id="employeeFilterGroup">
                 <select id="userId" class="custom-select">
                     <option value="">เลือกพนักงาน</option>
@@ -196,7 +217,6 @@ $agents_res = $conn->query("SELECT agent_id, agent_name FROM agent ORDER BY agen
                     <?php endwhile; ?>
                 </select>
             </div>
-            <?php endif; ?>
         </div>
 
         <div class="row">
@@ -209,7 +229,11 @@ $agents_res = $conn->query("SELECT agent_id, agent_name FROM agent ORDER BY agen
     </div>
 
     <!-- Results Section -->
-    <div class="report-result-title">ตัวอย่างรายงานที่สร้างขึ้น</div>
+    <div id="printHeader" style="display: none;">
+        <h2 id="printTitle">รายงาน</h2>
+        <p id="printDateRange"></p>
+        <p id="printPrintDate"></p>
+    </div>
     
     <div class="table-responsive">
         <table class="report-table" id="reportTable">
@@ -317,7 +341,7 @@ function renderTable(type, data) {
     else if (type === 'logs')   headers = ['เวลา','พนักงาน','การทำงาน','รายละเอียด','IP Address'];
 
     headers.forEach(function(h){
-        var align = (h.indexOf('จำนวนเงน')>=0||h.indexOf('เครดต')>=0||h.indexOf('ปรมาณ')>=0||h.indexOf('สถานะ')>=0)?'text-center':'';
+        var align = (h.indexOf('จำนวนเงิน')>=0||h.indexOf('เครดิต')>=0||h.indexOf('ปริมาณ')>=0||h.indexOf('สถานะ')>=0)?'text-center':'';
         thead.innerHTML += '<th class="'+align+'">'+h+'</th>';
     });
 
@@ -329,14 +353,23 @@ function renderTable(type, data) {
     if (type === 'combined') {
         var tA=0,tQ=0;
         _allData.forEach(function(r){ tA+=parseFloat(r.total_amount)||0; tQ+=parseFloat(r.qty)||0; });
-        summary.innerHTML = 'ยอดรวมปริมาณเครดิต : '+tQ.toLocaleString()+' | ยอดรวมเงิน : '+tA.toLocaleString(undefined,{minimumFractionDigits:2})+' บาท | ทั้งหมด '+_allData.length+' รายการ';
+        summary.innerHTML = 'ยอดรวมปริมาณเครดิต : '+tQ.toLocaleString()+'<br>ยอดรวมเงิน : '+tA.toLocaleString(undefined,{minimumFractionDigits:2})+' บาท<br><span style="font-size: 13px; color: #64748b;">ทั้งหมด '+_allData.length+' รายการ</span>';
     } else if (type === 'sales') {
         var tA2=0;
         _allData.forEach(function(r){ tA2+=parseFloat(r.sale_amount)||0; });
-        summary.innerHTML = 'ยอดรวมทั้งหมด: '+tA2.toLocaleString(undefined,{minimumFractionDigits:2})+' บาท | ทั้งหมด '+_allData.length+' รายการ';
+        summary.innerHTML = 'ยอดรวมทั้งหมด: '+tA2.toLocaleString(undefined,{minimumFractionDigits:2})+' บาท<br><span style="font-size: 13px; color: #64748b;">ทั้งหมด '+_allData.length+' รายการ</span>';
+    } else if (type === 'orders') {
+        var tQ2=0;
+        _allData.forEach(function(r){ tQ2+=parseFloat(r.order_quantity)||0; });
+        summary.innerHTML = 'ยอดรวมปริมาณเครดิตที่สั่งซื้อ: '+tQ2.toLocaleString()+'<br><span style="font-size: 13px; color: #64748b;">ทั้งหมด '+_allData.length+' รายการ</span>';
     } else {
-        summary.innerHTML = 'ทั้งหมด '+_allData.length+' รายการ';
+        summary.innerHTML = '<span style="font-size: 13px; color: #64748b;">ทั้งหมด '+_allData.length+' รายการ</span>';
     }
+
+    var typeText = document.getElementById('reportType').options[document.getElementById('reportType').selectedIndex].text;
+    document.getElementById('printTitle').innerText = typeText;
+    document.getElementById('printDateRange').innerText = 'ข้อมูลตั้งแต่วันที่: ' + formatThaiDate(document.getElementById('startDate').value) + ' ถึง ' + formatThaiDate(document.getElementById('endDate').value);
+    document.getElementById('printPrintDate').innerText = 'พิมพ์เมื่อ: ' + formatThaiDateTime(new Date());
 
     renderPage(1);
 }
@@ -373,7 +406,7 @@ function renderPage(page) {
                 +'<td class="text-center">'+(amt>0?Number(amt).toLocaleString(undefined,{minimumFractionDigits:2}):'-')+'</td></tr>';
         } else if (type === 'sales') {
             var amt2=parseFloat(row.sale_amount)||0;
-            rows += '<tr><td>'+formatThaiDate(row.sale_date)+'</td><td style="color:#059669">Sales</td><td>'+row.customer_name+'</td>'
+            rows += '<tr><td>'+formatThaiDate(row.sale_date)+'</td><td><span style="color:#059669"><i class="fas fa-tag" style="margin-right:4px"></i>ขาย</span></td><td>'+row.customer_name+'</td>'
                 +'<td class="text-center">'+Number(row.sale_credit).toLocaleString()+'</td>'
                 +'<td class="text-center">'+Number(amt2).toLocaleString(undefined,{minimumFractionDigits:2})+'</td></tr>';
         } else if (type === 'orders') {
@@ -383,7 +416,7 @@ function renderPage(page) {
             else if(row.order_status=='Rejected') sb='<span style="color:#dc2626;font-weight:500">ถูกปฏิเสธ</span>';
             else if(row.order_status=='Received') sb='<span style="color:#0284c7;font-weight:500">ได้รับเครดิตแล้ว</span>';
             var oid = row.order_number ? row.order_number : '#'+String(row.order_id).padStart(5,'0');
-            rows += '<tr><td>'+formatThaiDate(row.order_date)+'</td><td style="color:#0284c7">Purchase</td>'
+            rows += '<tr><td>'+formatThaiDate(row.order_date)+'</td><td><span style="color:#0284c7"><i class="fas fa-shopping-bag" style="margin-right:4px"></i>สั่งซื้อ</span></td>'
                 +'<td>'+oid+' / '+row.agent_name+'</td>'
                 +'<td class="text-center">'+Number(row.order_quantity).toLocaleString()+'</td>'
                 +'<td class="text-center">'+sb+'</td></tr>';
@@ -466,7 +499,17 @@ function exportPDF() {
         Swal.fire('ประมวลผลไม่สำเร็จ','ไม่มีข้อมูลสำหรับสร้างเอกสาร PDF โปรดกดดูรายงานก่อน','warning');
         return;
     }
+    
+    var oldPageSize = PAGE_SIZE;
+    PAGE_SIZE = _allData.length > 0 ? _allData.length : 15;
+    renderPage(1);
+    
     window.print();
+    
+    setTimeout(function() {
+        PAGE_SIZE = oldPageSize;
+        renderPage(1);
+    }, 1000);
 }
 
 document.addEventListener('DOMContentLoaded', function() {

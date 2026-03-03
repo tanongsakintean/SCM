@@ -54,11 +54,13 @@ if ($history_status !== '') {
 }
 
 $sql_history = "SELECT ap.*, pc.order_id, pc.order_number, pc.order_quantity, a.agent_name,
-                       CONCAT(u.firstname, ' ', u.lastname) as approver_name
+                       CONCAT(u_ap.firstname, ' ', u_ap.lastname) as approver_name,
+                       CONCAT(u_req.firstname, ' ', u_req.lastname) as requester_name
                 FROM approve ap 
                 JOIN purchase_credit pc ON ap.order_id = pc.order_id 
                 JOIN agent a ON pc.agent_id = a.agent_id
-                LEFT JOIN user u ON ap.user_id = u.user_id
+                LEFT JOIN user u_ap ON ap.user_id = u_ap.user_id
+                LEFT JOIN user u_req ON pc.user_id = u_req.user_id
                 WHERE 1=1 $sql_history_cond
                 ORDER BY ap.approval_date DESC, ap.approval_id DESC 
                 LIMIT 10";
@@ -691,6 +693,7 @@ if ($result_agents) {
                                 'order_number'   => $hist_display_id,
                                 'agent_name'     => $hist['agent_name'],
                                 'order_quantity' => $hist['order_quantity'],
+                                'requester_name' => $hist['requester_name'],
                                 'approver_name'  => $hist['approver_name'],
                                 'approval_date'  => $hist['approval_date'],
                                 'approval_status'=> $hist['approval_status'],
@@ -743,7 +746,11 @@ if ($result_agents) {
                 <div class="hp-info-label">วันที่อนุมัติ</div>
                 <div class="hp-info-value" id="hp_date">-</div>
             </div>
-            <div class="hp-info-item full-width">
+            <div class="hp-info-item">
+                <div class="hp-info-label">ผู้สั่งซื้อ</div>
+                <div class="hp-info-value" id="hp_requester_hist">-</div>
+            </div>
+            <div class="hp-info-item">
                 <div class="hp-info-label">ผู้อนุมัติ</div>
                 <div class="hp-info-value" id="hp_approver">-</div>
             </div>
@@ -763,6 +770,10 @@ if ($result_agents) {
     <div class="detail-row">
         <span class="label" id="dp_agent_name">-</span>
         <span class="value" id="dp_quantity">-</span>
+    </div>
+    <div class="detail-row">
+        <span class="label">ผู้สั่งซื้อ</span>
+        <span class="value" id="dp_requester">-</span>
     </div>
     <div class="detail-row">
         <span class="label">
@@ -842,9 +853,10 @@ if ($result_agents) {
 // ===== Detail Popup =====
 function showDetail(data) {
     document.getElementById('dp_agent_name').innerText = data.agent_name;
-    document.getElementById('dp_quantity').innerText = Number(data.order_quantity).toLocaleString();
+    document.getElementById('dp_quantity').innerText = Number(data.order_quantity).toLocaleString() + ' เครดิต';
     let displayId = data.order_number ? data.order_number : data.order_id.toString().padStart(5, '0');
     document.getElementById('dp_order_id').innerText = displayId;
+    document.getElementById('dp_requester').innerText = data.requester_name || '-';
 
     document.getElementById('popupOverlay').style.display = 'block';
     document.getElementById('detailPopup').style.display = 'block';
@@ -866,6 +878,7 @@ function showHistDetail(data) {
     document.getElementById('hp_order_number').innerText = '#' + data.order_number;
     document.getElementById('hp_agent_name').innerText = data.agent_name;
     document.getElementById('hp_quantity').innerText = Number(data.order_quantity).toLocaleString() + ' เครดิต';
+    document.getElementById('hp_requester_hist').innerText = data.requester_name || '-';
     document.getElementById('hp_approver').innerText = data.approver_name || '-';
 
     // Format date

@@ -21,7 +21,7 @@ $search_date = isset($_GET['d']) ? $_GET['d'] : '';
 
 // Fetch Order History
 $user_id = $_SESSION['user_id'];
-$role = $_SESSION['role'];
+$role_id = $_SESSION['role_id'] ?? 0;
 
 $sql_cond = "";
 if ($search_q !== '') {
@@ -48,7 +48,8 @@ $sql_orders = "SELECT pc.*, a.agent_name, c.category_name, u.username as request
                LEFT JOIN user u ON pc.user_id = u.user_id
                WHERE 1=1 $sql_cond";
 
-if ($role == 'Staff') {
+// If the user does not have permission to approve orders, they can only see their own orders
+if (!has_permission($role_id, 'approve_orders')) {
     $sql_orders .= " AND pc.user_id = $user_id";
 }
 $sql_orders .= " ORDER BY pc.order_date DESC, pc.order_id DESC";
@@ -155,7 +156,7 @@ while($ag = $agents_result_for_js->fetch_assoc()) {
 
 <div class="content-body">
     
-    <?php if ($role == 'Staff' || $role == 'Admin'): ?>
+    <?php if (has_permission($role_id, 'orders')): // Assuming anyone who can access orders page can create them, or could be a specific create_orders permission ?>
     <!-- Order Form Section -->
     <div class="card" style="margin-bottom: 24px; border: none; box-shadow: 0 2px 15px rgba(0,0,0,0.05);">
         <h5 class="card-title-header" style="border-bottom: 1px solid #edf2f7;"><i class="fas fa-cart-plus" style="margin-right: 10px; color: #0066ff;"></i>สร้างคำสั่งซื้อใหม่</h5>
@@ -238,7 +239,7 @@ while($ag = $agents_result_for_js->fetch_assoc()) {
                 </div>
 
                 <button type="submit" class="btn btn-primary" style="background: #0066ff; border: none; border-radius: 6px; padding: 7px 16px; font-size: 13px;"><i class="fas fa-search"></i> ค้นหา</button>
-                <a href="index.php?p=orders" class="btn btn-light" style="font-size: 13px; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 14px; color: #555;">ล้างซิม</a>
+                <a href="index.php?p=orders" class="btn btn-light" style="font-size: 13px; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 14px; color: #555;">ล้างค่า</a>
             </div>
         </form>
 
@@ -303,7 +304,10 @@ while($ag = $agents_result_for_js->fetch_assoc()) {
                                 <td><?php echo $status_html; ?></td>
                                 <td style="color: #64748b; font-size: 13px;"><?php echo $note_display_text; ?></td>
                                 <td>
-                                    <?php if($row['order_status'] == 'Approved' || $row['order_status'] == 'Received'): ?>
+                                    <?php 
+                                    // only show print when the order has been approved (or already received)
+                                    if ( ($row['order_status'] === 'Approved' || $row['order_status'] === 'Received')
+                                         && (has_permission($role_id, 'approve_orders') || (isset($_SESSION['user_id']) && $row['user_id'] == $_SESSION['user_id']))): ?>
                                         <a href="print_order.php?id=<?php echo $row['order_id']; ?>" target="_blank" class="btn btn-sm" style="color: #64748b; border: 1px solid #e2e8f0; background: #fff;" title="พิมพ์ใบสั่งซื้อ">
                                             <i class="fas fa-print"></i>
                                         </a>
@@ -591,6 +595,21 @@ if (urlParams.has('success_cancel')) {
             text: errorMsg,
             confirmButtonText: 'ตกลง',
             confirmButtonColor: '#d33'
+        });
+    });
+</script>
+<?php endif; ?>
+
+<?php if (isset($_GET['success_approve'])): ?>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            icon: 'success',
+            title: 'อนุมัติคำสั่งซื้อเรียบร้อย',
+            showConfirmButton: false,
+            timer: 1500
+        }).then(() => {
+            window.history.replaceState(null, null, window.location.pathname + '?p=orders');
         });
     });
 </script>

@@ -65,7 +65,7 @@ if (!isset($_SESSION['user_id'])) {
             }
             // Check if default landing override
             if (!isset($_GET['p'])) {
-                if ($_SESSION["role"] != 'Admin' && $_SESSION["role"] != 'Manager') {
+                if (!has_permission($_SESSION['role_id'] ?? 0, 'settings') && !has_permission($_SESSION['role_id'] ?? 0, 'users')) {
                      $pageTitle = 'ฝ่ายขาย'; // Staff lands on sales
                 }
             }
@@ -96,16 +96,27 @@ if (!isset($_SESSION['user_id'])) {
                     <div class="user-dropdown">
                         <div class="user-info" onclick="toggleDropdown()">
                             <i class="fas fa-user-circle user-avatar"></i>
+                            <?php
+                            $display_role = 'User';
+                            if (isset($_SESSION['role_id']) && $_SESSION['role_id'] > 0) {
+                                $rid = intval($_SESSION['role_id']);
+                                $r_sql = "SELECT role_name FROM roles WHERE role_id = $rid";
+                                $r_res = $conn->query($r_sql);
+                                if ($r_res && $row = $r_res->fetch_assoc()) {
+                                    $display_role = $row['role_name'];
+                                }
+                            }
+                            ?>
                             <div class="user-text">
                                 <span class="user-name"><?php echo htmlspecialchars($_SESSION['firstname'] . ' ' . $_SESSION['lastname']); ?></span>
-                                <span class="user-role"><?php echo htmlspecialchars($_SESSION['role']); ?></span>
+                                <span class="user-role"><?php echo htmlspecialchars($display_role); ?></span>
                             </div>
                             <i class="fas fa-chevron-down ml-2" style="font-size: 12px;"></i>
                         </div>
                         <div class="dropdown-menu" id="userDropdown">
                              <div class="dropdown-item-header">
                                 <strong><?php echo htmlspecialchars($_SESSION['firstname']); ?></strong>
-                                <small><?php echo htmlspecialchars($_SESSION['role']); ?></small>
+                                <small><?php echo htmlspecialchars($display_role); ?></small>
                              </div>
                              <a href="login.php?logout=1" class="dropdown-item text-danger"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ</a>
                         </div>
@@ -135,7 +146,7 @@ if (!isset($_SESSION['user_id'])) {
                     include $p . ".php";
                 }
             } else {
-                if ($_SESSION["role"] == 'Admin' || $_SESSION["role"] == 'Manager') {
+                if (has_permission($_SESSION['role_id'] ?? 0, 'dashboard') || has_permission($_SESSION['role_id'] ?? 0, 'settings')) {
                     include "dashboard.php";
                 } else {
                     // Default logic: Check if they have sales permission, else dashboard

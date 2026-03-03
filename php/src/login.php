@@ -3,7 +3,7 @@ session_start();
 if (isset($_GET['logout'])) {
     session_destroy();
     unset($_SESSION['user_id']);
-    unset($_SESSION['role']);
+    // unset($_SESSION['role']);
 }
 ?>
 <!DOCTYPE html>

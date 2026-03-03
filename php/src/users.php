@@ -1,6 +1,12 @@
 <?php
 include 'connect.php';
 
+// Only users with 'users' permission can access this page
+if (!has_permission($_SESSION['role_id'] ?? 0, 'users')) {
+    header("Location: index.php");
+    exit;
+}
+
 // Fetch Users with Role
 $sql_users = "SELECT u.*, p.permission_name as role 
               FROM user u 

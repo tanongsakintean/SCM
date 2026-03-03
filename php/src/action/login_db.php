@@ -26,8 +26,6 @@ if ($result->num_rows > 0) {
     $_SESSION['username'] = $row['username'];
     $_SESSION['firstname'] = $row['firstname'];
     $_SESSION['lastname'] = $row['lastname'];
-    $_SESSION['role'] = $row['permission_name']; // Admin, Staff, Manager
-    
     // Fetch Role ID from roles table
     $role_name = $row['permission_name'];
     $role_query = $conn->query("SELECT role_id FROM roles WHERE role_name = '$role_name'");

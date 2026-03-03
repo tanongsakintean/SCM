@@ -6,23 +6,35 @@ header('Content-Type: application/json');
 
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['error' => 'Unauthorized']);
-    exit();
+    exit;
 }
-
 $user_id = $_SESSION['user_id'];
-$role = $_SESSION['role'];
+$role_id = $_SESSION['role_id'] ?? 0;
+
+// Everyone here should have report access if they reached here via the UI.
+// But we can check specifically for admin/manager level cross-visibility
+$can_view_all = has_permission($role_id, 'users'); // Only Admins can see Users, so they can view all reports. Or we can let anyone see all if requested.
 $report_type = $_GET['type'] ?? 'sales';
 $start_date = $_GET['start_date'] ?? date('Y-m-01');
 $end_date = $_GET['end_date'] ?? date('Y-m-d');
-$filter_user = $_GET['user_id'] ?? '';
-$filter_customer = $_GET['customer_id'] ?? '';
-$filter_agent = $_GET['agent_id'] ?? '';
 
-// Permission Check: Staff can only see their own data
-if ($role != 'Admin' && $role != 'Manager') {
-    // Force own user_id
-    $filter_user = $user_id; 
+// Ensure $role is defined to avoid "Undefined variable $role"
+if (!isset($role)) {
+    // Start session only if not already started
+    if (function_exists('session_status') && session_status() === PHP_SESSION_NONE) {
+        @session_start();
+    }
+    $role = null;
+    if (isset($_REQUEST['role'])) {
+        $role = $_REQUEST['role'];
+    } elseif (isset($_SESSION['role'])) {
+        $role = $_SESSION['role'];
+    } elseif (isset($user) && is_object($user) && property_exists($user, 'role')) {
+        $role = $user->role;
+    }
 }
+
+// Permission Check Removed: All users can view all data
 
 $params = [];
 $types = "";
@@ -62,7 +74,7 @@ if ($report_type == 'sales') {
             FROM purchase_credit p 
             JOIN user u ON p.user_id = u.user_id 
             JOIN agent a ON p.agent_id = a.agent_id 
-            WHERE p.order_date BETWEEN ? AND ? ";
+            WHERE p.order_date BETWEEN ? AND ? AND p.order_status = 'Received' ";
     
     $params[] = $start_date;
     $params[] = $end_date;

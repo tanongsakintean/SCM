@@ -445,7 +445,7 @@ if ($res_today_sales_count) {
                 $has_any = false;
 
                 // 1. เครดิต SMS ต่ำกว่าเกณฑ์ (Critical)
-                if ($show_warning):
+                if (has_permission($role_id, 'settings') && $show_warning):
                     $has_any = true;
                 ?>
                 <a href="index.php?p=settings" class="notify-item n-red">
@@ -459,7 +459,7 @@ if ($res_today_sales_count) {
 
                 <?php
                 // 2. เครดิต SMS เหลือน้อย (Warning แม้ไม่ถึง notify)
-                if ($credit_balance < $credit_min && !$show_warning):
+                if (has_permission($role_id, 'settings') && $credit_balance < $credit_min && !$show_warning):
                     $has_any = true;
                 ?>
                 <a href="index.php?p=settings" class="notify-item n-yellow">
@@ -473,7 +473,7 @@ if ($res_today_sales_count) {
 
                 <?php
                 // 3. กำลังรออนุมัติ (Pending)
-                if ($pending_count > 0):
+                if (has_permission($role_id, 'approve_orders') && $pending_count > 0):
                     $has_any = true;
                 ?>
                 <a href="index.php?p=approve_orders" class="notify-item n-orange">
@@ -487,7 +487,7 @@ if ($res_today_sales_count) {
 
                 <?php
                 // 4. อนุมัติแล้ว รอรับเครดิต (Approved → ยังไม่ Received)
-                if ($approved_count > 0):
+                if (has_permission($role_id, 'receive_credit') && $approved_count > 0):
                     $has_any = true;
                 ?>
                 <a href="index.php?p=receive_credit" class="notify-item n-blue">
@@ -501,7 +501,7 @@ if ($res_today_sales_count) {
 
                 <?php
                 // 5. การขายเกิดขึ้นวันนี้ (Active process)
-                if ($today_sales_count > 0):
+                if (has_permission($role_id, 'reports') && $today_sales_count > 0):
                     $has_any = true;
                 ?>
                 <a href="index.php?p=reports" class="notify-item n-green">
@@ -515,11 +515,12 @@ if ($res_today_sales_count) {
 
                 <?php
                 // รายละเอียด pending orders แต่ละรายการ
-                $result_pending->data_seek(0);
-                if ($result_pending->num_rows > 0):
-                    while($row = $result_pending->fetch_assoc()):
-                        $has_any = true;
-                        $display_id = !empty($row['order_number']) ? $row['order_number'] : str_pad($row['order_id'], 5, '0', STR_PAD_LEFT);
+                if (has_permission($role_id, 'approve_orders')):
+                    $result_pending->data_seek(0);
+                    if ($result_pending->num_rows > 0):
+                        while($row = $result_pending->fetch_assoc()):
+                            $has_any = true;
+                            $display_id = !empty($row['order_number']) ? $row['order_number'] : str_pad($row['order_id'], 5, '0', STR_PAD_LEFT);
                 ?>
                 <a href="index.php?p=approve_orders" class="notify-item n-blue">
                     <div class="notify-icon blue"><i class="fas fa-clock"></i></div>
@@ -529,7 +530,8 @@ if ($res_today_sales_count) {
                     </div>
                 </a>
                 <?php
-                    endwhile;
+                        endwhile;
+                    endif;
                 endif;
                 ?>
 

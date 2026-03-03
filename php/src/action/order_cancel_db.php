@@ -1,6 +1,7 @@
 <?php
 session_start();
 include '../connect.php';
+include '../includes/functions.php';
 
 // Check login
 if (!isset($_SESSION['user_id'])) {
@@ -11,21 +12,18 @@ if (!isset($_SESSION['user_id'])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $order_id = $_POST['order_id'];
     $user_id = $_SESSION['user_id'];
-    $role = $_SESSION['role'];
+    $role_id = $_SESSION['role_id'] ?? 0;
 
     // Validate Input
     if (empty($order_id)) {
         header("Location: ../index.php?p=orders&error=invalid_request");
         exit();
     }
-
-    // Prepare SQL to check order ownership and status
-    // Admin can cancel any pending order? Usually user cancels their own. Let's stick to user cancels own for now as per request.
-    // Logic: User must own the order AND status must be 'Pending'.
     
-    // However, if Admin wants to cancel, they usually use "Reject". This "Cancel" feature is for the requester.
-    if ($role == 'Admin') {
-         // Admin might use this too, but let's safe guard it to Pending only
+    // Instead of directly checking for 'Admin' role, we check if they have specific permissions
+    // Usually, admins can do approve_orders and others cannot. Based on previous functions let's rely on that or simplify it since this feature belongs to the requester.
+    if (has_permission($role_id, 'approve_orders')) {
+         // Those with approval access can cancel any order, others can only cancel their own
          $sql = "SELECT order_status, user_id FROM purchase_credit WHERE order_id = ?";
          $stmt = $conn->prepare($sql);
          $stmt->bind_param("i", $order_id);

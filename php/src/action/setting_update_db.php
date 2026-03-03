@@ -1,11 +1,11 @@
 <?php
 session_start();
-include '../connect.php';
+include '../includes/functions.php';
 
 // 1. Auth Check
-if (!isset($_SESSION['user_id']) || ($_SESSION['role'] != 'Admin' && $_SESSION['role'] != 'Manager')) {
-    header("Location: ../index.php");
-    exit();
+if (!isset($_SESSION['user_id']) || !has_permission($_SESSION['role_id'] ?? 0, 'settings')) {
+    echo "unauthorized";
+    exit;
 }
 
 $user_id = $_SESSION['user_id'];
