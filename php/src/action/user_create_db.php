@@ -66,7 +66,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $sql_perm = "INSERT INTO permission (user_id, permission_name) VALUES ('$last_id', '$role_name')";
         $conn->query($sql_perm);
-        
+
+        // Audit Log
+        $admin_id = $_SESSION['user_id'] ?? 0;
+        $ip_address = $_SERVER['REMOTE_ADDR'];
+        $log_action = "Create User";
+        $log_details = "Created user '$username' (ID: $last_id) with role: $role_name";
+        $log_sql = "INSERT INTO system_log (user_id, action, details, ip_address) VALUES (?, ?, ?, ?)";
+        $log_stmt = $conn->prepare($log_sql);
+        if ($log_stmt) {
+            $log_stmt->bind_param("isss", $admin_id, $log_action, $log_details, $ip_address);
+            $log_stmt->execute();
+        }
+
         header("Location: ../index.php?p=users&success=เพิ่มผู้ใช้สำเร็จ");
     } else {
         header("Location: ../index.php?p=users&error=" . $conn->error);

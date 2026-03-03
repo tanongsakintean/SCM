@@ -56,6 +56,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $update_stmt->bind_param("i", $order_id);
 
     if ($update_stmt->execute()) {
+        // Audit Log
+        $ip_address = $_SERVER['REMOTE_ADDR'];
+        $log_action = "Cancel Order";
+        $log_details = "Cancelled Order ID: $order_id";
+        $stmt_log = $conn->prepare("INSERT INTO system_log (user_id, action, details, ip_address) VALUES (?, ?, ?, ?)");
+        if ($stmt_log) {
+            $stmt_log->bind_param("isss", $user_id, $log_action, $log_details, $ip_address);
+            $stmt_log->execute();
+        }
         header("Location: ../index.php?p=orders&success_cancel=1");
     } else {
         header("Location: ../index.php?p=orders&error=db_error");

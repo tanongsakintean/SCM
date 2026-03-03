@@ -38,6 +38,18 @@ if ($result->num_rows > 0) {
         $_SESSION['role_id'] = 0; // No role or User role
     }
     
+    // Audit Log: Record Login
+    $ip_address = $_SERVER['REMOTE_ADDR'];
+    $log_user_id = $row['user_id'];
+    $log_action = "Login";
+    $log_details = "User '" . $row['username'] . "' logged in with role: " . $row['permission_name'];
+    $log_sql = "INSERT INTO system_log (user_id, action, details, ip_address) VALUES (?, ?, ?, ?)";
+    $log_stmt = $conn->prepare($log_sql);
+    if ($log_stmt) {
+        $log_stmt->bind_param("isss", $log_user_id, $log_action, $log_details, $ip_address);
+        $log_stmt->execute();
+    }
+
     header("Location: ../index.php");
 } else {
     // Login failed

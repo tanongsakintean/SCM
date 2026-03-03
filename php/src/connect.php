@@ -1,5 +1,5 @@
 <?php
-$servername = "localhost:9906"; 
+$servername = "localhost"; 
 $username = "root";
 $password = "root";
 $dbname = "DB_SCM";

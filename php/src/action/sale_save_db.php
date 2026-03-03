@@ -50,7 +50,19 @@ try {
     $stmt3->bind_param("ii", $sale_credit, $customer_id);
     if (!$stmt3->execute()) throw new Exception("Failed to update customer credit balance.");
 
+    $sale_id = $stmt1->insert_id;
     $conn->commit();
+    
+    // 5. Audit Log
+    $ip_address = $_SERVER['REMOTE_ADDR'];
+    $log_action = "Create Sale";
+    $log_details = "Sale ID: $sale_id | Customer ID: $customer_id | Credit Sold: $sale_credit | Amount: $sale_amount";
+    $stmt_log = $conn->prepare("INSERT INTO system_log (user_id, action, details, ip_address) VALUES (?, ?, ?, ?)");
+    if ($stmt_log) {
+        $stmt_log->bind_param("isss", $user_id, $log_action, $log_details, $ip_address);
+        $stmt_log->execute();
+    }
+
     header("Location: ../index.php?p=sales&success=1");
 
 } catch (Exception $e) {

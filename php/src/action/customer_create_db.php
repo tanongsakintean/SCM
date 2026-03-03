@@ -32,6 +32,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             VALUES ('$customer_name', '$customer_phone', '$customer_email')";
             
     if ($conn->query($sql) === TRUE) {
+        $customer_id = $conn->insert_id;
+        
+        // Audit Log
+        $admin_id = $_SESSION['user_id'] ?? 0;
+        $ip_address = $_SERVER['REMOTE_ADDR'];
+        $log_action = "Create Customer";
+        $log_details = "Created customer '$customer_name' (ID: $customer_id) Email: $customer_email";
+        $log_sql = "INSERT INTO system_log (user_id, action, details, ip_address) VALUES (?, ?, ?, ?)";
+        $log_stmt = $conn->prepare($log_sql);
+        if ($log_stmt) {
+            $log_stmt->bind_param("isss", $admin_id, $log_action, $log_details, $ip_address);
+            $log_stmt->execute();
+        }
+
         header("Location: ../index.php?p=users&tab=customer&success=เพิ่มลูกค้าสำเร็จ");
     } else {
         header("Location: ../index.php?p=users&tab=customer&error=" . $conn->error);
