@@ -446,6 +446,118 @@ if ($result_agents) {
 .hf-id { color: #0066ff; font-weight: 600; background: #eef2ff; padding: 2px 6px; border-radius: 4px; font-size: 12px; display: inline-block; margin-right: 8px; }
 .hf-supplier { color: #334155; font-weight: 500; }
 .hf-date { color: #94a3b8; font-size: 12px; display: flex; align-items: center; gap: 4px; }
+
+/* History Detail Popup */
+.hist-detail-popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 12px 48px rgba(0,0,0,0.2);
+    z-index: 1050;
+    width: 440px;
+    padding: 0;
+    overflow: hidden;
+}
+.hist-popup-header {
+    padding: 18px 24px 14px;
+    border-bottom: 1px solid #edf2f7;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.hist-popup-header .hist-popup-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #2d3748;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.hist-popup-header .hist-popup-close {
+    background: #f1f5f9;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+}
+.hist-popup-header .hist-popup-close:hover { background: #e2e8f0; }
+.hist-popup-body {
+    padding: 20px 24px;
+}
+.hp-status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 15px;
+    font-weight: 600;
+    gap: 8px;
+}
+.hp-status-bar.approved { background: #e8f5e9; color: #2e7d32; }
+.hp-status-bar.rejected { background: #ffebee; color: #c62828; }
+.hp-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+.hp-info-item {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 12px 14px;
+}
+.hp-info-item.full-width { grid-column: 1 / -1; }
+.hp-info-label {
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+.hp-info-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #2d3748;
+}
+.hp-note-box {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: #78350f;
+    margin-top: 14px;
+    display: none;
+}
+.hp-note-box.has-note { display: block; }
+.btn-hf-detail {
+    background: #f1f5f9;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    color: #475569;
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.btn-hf-detail:hover { background: #e2e8f0; color: #1e40af; }
 </style>
 
 <!-- DateRangePicker Libraries -->
@@ -573,8 +685,19 @@ if ($result_agents) {
                             <div><span class="hf-id">#<?php echo $hist_display_id; ?></span><span class="hf-supplier"><?php echo htmlspecialchars($hist['agent_name']); ?></span></div>
                             <div class="hf-date"><i class="far fa-calendar-alt"></i> <?php echo date('d/m/Y', strtotime($hist['approval_date'])); ?> <i class="far fa-clock" style="margin-left: 4px;"></i> <?php echo date('H:i', strtotime($hist['approval_date'])); ?></div>
                         </div>
-                        <div class="hf-info-col2">
-                            <?php echo date('d M Y H:i', strtotime($hist['approval_date'])); ?>
+                        <div class="hf-info-col2" style="gap: 10px;">
+                            <button type="button" class="btn-hf-detail" onclick="showHistDetail(<?php echo htmlspecialchars(json_encode([
+                                'order_id'       => $hist['order_id'],
+                                'order_number'   => $hist_display_id,
+                                'agent_name'     => $hist['agent_name'],
+                                'order_quantity' => $hist['order_quantity'],
+                                'approver_name'  => $hist['approver_name'],
+                                'approval_date'  => $hist['approval_date'],
+                                'approval_status'=> $hist['approval_status'],
+                                'note'           => $hist['note'] ?? '',
+                            ])); ?>)">
+                                <i class="fas fa-eye"></i> รายละเอียด
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -588,7 +711,49 @@ if ($result_agents) {
 </form>
 
 <!-- ===== Detail Popup Overlay ===== -->
-<div class="popup-overlay" id="popupOverlay" onclick="closeDetailPopup()"></div>
+<div class="popup-overlay" id="popupOverlay" onclick="closeAllPopups()"></div>
+
+<!-- ===== History Detail Popup ===== -->
+<div class="hist-detail-popup" id="histDetailPopup">
+    <div class="hist-popup-header">
+        <div class="hist-popup-title">
+            <i class="fas fa-history" style="color:#0066ff;"></i> รายละเอียดประวัติการอนุมัติ
+        </div>
+        <button class="hist-popup-close" onclick="closeHistDetail()">&times;</button>
+    </div>
+    <div class="hist-popup-body">
+        <div class="hp-status-bar" id="hp_status_bar">
+            <i class="fas" id="hp_status_icon"></i>
+            <span id="hp_status_text">-</span>
+        </div>
+        <div class="hp-info-grid">
+            <div class="hp-info-item">
+                <div class="hp-info-label">เลขที่ใบสั่งซื้อ</div>
+                <div class="hp-info-value" id="hp_order_number">-</div>
+            </div>
+            <div class="hp-info-item">
+                <div class="hp-info-label">ซัพพลายเออร์</div>
+                <div class="hp-info-value" id="hp_agent_name">-</div>
+            </div>
+            <div class="hp-info-item">
+                <div class="hp-info-label">จำนวนเครดิต</div>
+                <div class="hp-info-value" id="hp_quantity">-</div>
+            </div>
+            <div class="hp-info-item">
+                <div class="hp-info-label">วันที่อนุมัติ</div>
+                <div class="hp-info-value" id="hp_date">-</div>
+            </div>
+            <div class="hp-info-item full-width">
+                <div class="hp-info-label">ผู้อนุมัติ</div>
+                <div class="hp-info-value" id="hp_approver">-</div>
+            </div>
+        </div>
+        <div class="hp-note-box" id="hp_note_box">
+            <strong><i class="fas fa-sticky-note"></i> หมายเหตุ:</strong>
+            <div id="hp_note" style="margin-top:4px;">-</div>
+        </div>
+    </div>
+</div>
 
 <!-- ===== Detail Popup ===== -->
 <div class="detail-popup" id="detailPopup">
@@ -688,6 +853,48 @@ function showDetail(data) {
 function closeDetailPopup() {
     document.getElementById('popupOverlay').style.display = 'none';
     document.getElementById('detailPopup').style.display = 'none';
+}
+
+// ===== History Detail Popup =====
+function showHistDetail(data) {
+    const isApproved = data.approval_status === 'Approved';
+    const statusBar = document.getElementById('hp_status_bar');
+    statusBar.className = 'hp-status-bar ' + (isApproved ? 'approved' : 'rejected');
+    document.getElementById('hp_status_icon').className = 'fas ' + (isApproved ? 'fa-check-circle' : 'fa-times-circle');
+    document.getElementById('hp_status_text').innerText = isApproved ? 'อนุมัติแล้ว' : 'ไม่อนุมัติ';
+
+    document.getElementById('hp_order_number').innerText = '#' + data.order_number;
+    document.getElementById('hp_agent_name').innerText = data.agent_name;
+    document.getElementById('hp_quantity').innerText = Number(data.order_quantity).toLocaleString() + ' เครดิต';
+    document.getElementById('hp_approver').innerText = data.approver_name || '-';
+
+    // Format date
+    const d = new Date(data.approval_date);
+    const dateStr = d.toLocaleDateString('th-TH', {day:'2-digit', month:'2-digit', year:'numeric'}) + ' ' + d.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'});
+    document.getElementById('hp_date').innerText = dateStr;
+
+    // Note
+    const noteBox = document.getElementById('hp_note_box');
+    if (data.note && data.note.trim() !== '') {
+        document.getElementById('hp_note').innerText = data.note;
+        noteBox.classList.add('has-note');
+    } else {
+        noteBox.classList.remove('has-note');
+    }
+
+    document.getElementById('popupOverlay').style.display = 'block';
+    document.getElementById('histDetailPopup').style.display = 'block';
+}
+
+function closeHistDetail() {
+    document.getElementById('popupOverlay').style.display = 'none';
+    document.getElementById('histDetailPopup').style.display = 'none';
+}
+
+function closeAllPopups() {
+    closeDetailPopup();
+    closeHistDetail();
+    closeRejectPopup();
 }
 
 // ===== Approve Modal =====
