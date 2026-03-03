@@ -96,7 +96,10 @@ if (!isset($_SESSION['user_id'])) {
                     <div class="user-dropdown">
                         <div class="user-info" onclick="toggleDropdown()">
                             <i class="fas fa-user-circle user-avatar"></i>
-                            <span class="user-name"><?php echo htmlspecialchars($_SESSION['firstname'] . ' ' . $_SESSION['lastname']); ?></span>
+                            <div class="user-text">
+                                <span class="user-name"><?php echo htmlspecialchars($_SESSION['firstname'] . ' ' . $_SESSION['lastname']); ?></span>
+                                <span class="user-role"><?php echo htmlspecialchars($_SESSION['role']); ?></span>
+                            </div>
                             <i class="fas fa-chevron-down ml-2" style="font-size: 12px;"></i>
                         </div>
                         <div class="dropdown-menu" id="userDropdown">
