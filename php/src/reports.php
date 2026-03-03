@@ -107,6 +107,10 @@
 .report-table tbody tr:hover td {
     background-color: #f1f5f9;
 }
+.report-table thead th.text-center,
+.report-table tbody td.text-center {
+    text-align: center !important;
+}
 
 @media print {
     body { background-color: white !important; }
@@ -214,8 +218,8 @@ $agents_res = $conn->query("SELECT agent_id, agent_name FROM agent ORDER BY agen
                     <th>วันที่</th>
                     <th>ประเภทธุรกรรม</th>
                     <th>รหัสคำสั่งซื้อ/ลูกค้า</th>
-                    <th class="text-right">เครดิต/ปริมาณ</th>
-                    <th class="text-right">จำนวนเงินทั้งหมด</th>
+                    <th class="text-center">เครดิต/ปริมาณ</th>
+                    <th class="text-center">จำนวนเงินทั้งหมด</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
@@ -313,7 +317,7 @@ function renderTable(type, data) {
     else if (type === 'logs')   headers = ['เวลา','พนกงาน','การทำงาน','รายละเอยด','IP Address'];
 
     headers.forEach(function(h){
-        var align = (h.indexOf('จำนวนเงน')>=0||h.indexOf('เครดต')>=0||h.indexOf('ปรมาณ')>=0||h.indexOf('สถานะ')>=0)?'text-right':'';
+        var align = (h.indexOf('จำนวนเงน')>=0||h.indexOf('เครดต')>=0||h.indexOf('ปรมาณ')>=0||h.indexOf('สถานะ')>=0)?'text-center':'';
         thead.innerHTML += '<th class="'+align+'">'+h+'</th>';
     });
 
@@ -365,13 +369,13 @@ function renderPage(page) {
                 ? '<span style="color:#059669"><i class="fas fa-tag" style="margin-right:4px"></i>ขาย</span>'
                 : '<span style="color:#0284c7"><i class="fas fa-shopping-bag" style="margin-right:4px"></i>สงซอ</span>';
             rows += '<tr><td>'+formatThaiDate(row.t_date)+'</td><td>'+typeLabel+'</td><td>'+(row.reference||'-')+'</td>'
-                +'<td class="text-right">'+Number(qty).toLocaleString()+'</td>'
-                +'<td class="text-right">'+(amt>0?Number(amt).toLocaleString(undefined,{minimumFractionDigits:2}):'-')+'</td></tr>';
+                +'<td class="text-center">'+Number(qty).toLocaleString()+'</td>'
+                +'<td class="text-center">'+(amt>0?Number(amt).toLocaleString(undefined,{minimumFractionDigits:2}):'-')+'</td></tr>';
         } else if (type === 'sales') {
             var amt2=parseFloat(row.sale_amount)||0;
             rows += '<tr><td>'+formatThaiDate(row.sale_date)+'</td><td style="color:#059669">Sales</td><td>'+row.customer_name+'</td>'
-                +'<td class="text-right">'+Number(row.sale_credit).toLocaleString()+'</td>'
-                +'<td class="text-right">'+Number(amt2).toLocaleString(undefined,{minimumFractionDigits:2})+'</td></tr>';
+                +'<td class="text-center">'+Number(row.sale_credit).toLocaleString()+'</td>'
+                +'<td class="text-center">'+Number(amt2).toLocaleString(undefined,{minimumFractionDigits:2})+'</td></tr>';
         } else if (type === 'orders') {
             var sb='';
             if(row.order_status=='Approved') sb='<span style="color:#059669;font-weight:500">อนมตแลว</span>';
@@ -381,8 +385,8 @@ function renderPage(page) {
             var oid = row.order_number ? row.order_number : '#'+String(row.order_id).padStart(5,'0');
             rows += '<tr><td>'+formatThaiDate(row.order_date)+'</td><td style="color:#0284c7">Purchase</td>'
                 +'<td>'+oid+' / '+row.agent_name+'</td>'
-                +'<td class="text-right">'+Number(row.order_quantity).toLocaleString()+'</td>'
-                +'<td class="text-right">'+sb+'</td></tr>';
+                +'<td class="text-center">'+Number(row.order_quantity).toLocaleString()+'</td>'
+                +'<td class="text-center">'+sb+'</td></tr>';
         } else if (type === 'logs') {
             var ac = actionColors[row.action] || {bg:'#f1f5f9',c:'#475569'};
             var badge = '<span style="background:'+ac.bg+';color:'+ac.c+';padding:2px 10px;border-radius:999px;font-size:12px;font-weight:600">'+row.action+'</span>';
