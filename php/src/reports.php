@@ -280,7 +280,7 @@ function runReport() {
     var agentId = document.getElementById('agentId') ? document.getElementById('agentId').value : '';
     var userId = document.getElementById('userId') ? document.getElementById('userId').value : '';
 
-    document.getElementById('tableBody').innerHTML = '<tr><td colspan="5" class="text-center p-5"><i class="fas fa-spinner fa-spin fa-2x text-primary"></i><br>กำลงประมวลผล...</td></tr>';
+    document.getElementById('tableBody').innerHTML = '<tr><td colspan="5" class="text-center p-5"><i class="fas fa-spinner fa-spin fa-2x text-primary"></i><br>กำลังประมวลผล...</td></tr>';
     document.getElementById('paginationContainer').innerHTML = '';
     document.getElementById('reportSummary').innerHTML = '';
 
@@ -295,7 +295,7 @@ function runReport() {
         })
         .catch(function(err){
             console.error(err);
-            document.getElementById('tableBody').innerHTML = '<tr><td colspan="5" class="text-center text-danger p-4">เกดขอผดพลาดในการดงขอมล</td></tr>';
+            document.getElementById('tableBody').innerHTML = '<tr><td colspan="5" class="text-center text-danger p-4">เกิดข้อผิดพลาดในการดึงข้อมูล</td></tr>';
         });
 }
 
@@ -312,9 +312,9 @@ function renderTable(type, data) {
 
     var headers = [];
     if (type === 'combined') headers = ['วันที่','ประเภทธุรกรรม','รหัสคำสั่งซื้อ/ลูกค้า','เครดิต/ปริมาณ','จำนวนเงินทั้งหมด'];
-    else if (type === 'sales')  headers = ['วนท','ประเภทธรกรรม','ลกคา','เครดตทขาย','จำนวนเงนทงหมด'];
-    else if (type === 'orders') headers = ['วนท','ประเภทธรกรรม','รหสคำสงซอ/ซพพลายเออร','ปรมาณ','สถานะ'];
-    else if (type === 'logs')   headers = ['เวลา','พนกงาน','การทำงาน','รายละเอยด','IP Address'];
+    else if (type === 'sales')  headers = ['วันที่','ประเภทธุรกรรม','ลูกค้า','เครดิตที่ขาย','จำนวนเงินทั้งหมด'];
+    else if (type === 'orders') headers = ['วันที่','ประเภทธุรกรรม','รหัสคำสั่งซื้อ/ซัพพลายเออร์','ปริมาณ','สถานะ'];
+    else if (type === 'logs')   headers = ['เวลา','พนักงาน','การทำงาน','รายละเอียด','IP Address'];
 
     headers.forEach(function(h){
         var align = (h.indexOf('จำนวนเงน')>=0||h.indexOf('เครดต')>=0||h.indexOf('ปรมาณ')>=0||h.indexOf('สถานะ')>=0)?'text-center':'';
@@ -322,20 +322,20 @@ function renderTable(type, data) {
     });
 
     if (!_allData.length) {
-        document.getElementById('tableBody').innerHTML = '<tr><td colspan="5" class="text-center text-muted p-5">ไมพบขอมลในชวงเวลาทเลอก</td></tr>';
+        document.getElementById('tableBody').innerHTML = '<tr><td colspan="5" class="text-center text-muted p-5">ไม่พบข้อมูลในช่วงเวลาที่เลือก</td></tr>';
         return;
     }
 
     if (type === 'combined') {
         var tA=0,tQ=0;
         _allData.forEach(function(r){ tA+=parseFloat(r.total_amount)||0; tQ+=parseFloat(r.qty)||0; });
-        summary.innerHTML = 'ยอดรวมปรมาณเครดต : '+tQ.toLocaleString()+' | ยอดรวมเงน : '+tA.toLocaleString(undefined,{minimumFractionDigits:2})+' บาท | ทงหมด '+_allData.length+' รายการ';
+        summary.innerHTML = 'ยอดรวมปริมาณเครดิต : '+tQ.toLocaleString()+' | ยอดรวมเงิน : '+tA.toLocaleString(undefined,{minimumFractionDigits:2})+' บาท | ทั้งหมด '+_allData.length+' รายการ';
     } else if (type === 'sales') {
         var tA2=0;
         _allData.forEach(function(r){ tA2+=parseFloat(r.sale_amount)||0; });
-        summary.innerHTML = 'ยอดรวมทงหมด: '+tA2.toLocaleString(undefined,{minimumFractionDigits:2})+' บาท | ทงหมด '+_allData.length+' รายการ';
+        summary.innerHTML = 'ยอดรวมทั้งหมด: '+tA2.toLocaleString(undefined,{minimumFractionDigits:2})+' บาท | ทั้งหมด '+_allData.length+' รายการ';
     } else {
-        summary.innerHTML = 'ทงหมด '+_allData.length+' รายการ';
+        summary.innerHTML = 'ทั้งหมด '+_allData.length+' รายการ';
     }
 
     renderPage(1);
@@ -367,7 +367,7 @@ function renderPage(page) {
             var amt=parseFloat(row.total_amount)||0, qty=parseFloat(row.qty)||0;
             var typeLabel = row.transaction_type==='Sales'
                 ? '<span style="color:#059669"><i class="fas fa-tag" style="margin-right:4px"></i>ขาย</span>'
-                : '<span style="color:#0284c7"><i class="fas fa-shopping-bag" style="margin-right:4px"></i>สงซอ</span>';
+                : '<span style="color:#0284c7"><i class="fas fa-shopping-bag" style="margin-right:4px"></i>สั่งซื้อ</span>';
             rows += '<tr><td>'+formatThaiDate(row.t_date)+'</td><td>'+typeLabel+'</td><td>'+(row.reference||'-')+'</td>'
                 +'<td class="text-center">'+Number(qty).toLocaleString()+'</td>'
                 +'<td class="text-center">'+(amt>0?Number(amt).toLocaleString(undefined,{minimumFractionDigits:2}):'-')+'</td></tr>';
@@ -378,10 +378,10 @@ function renderPage(page) {
                 +'<td class="text-center">'+Number(amt2).toLocaleString(undefined,{minimumFractionDigits:2})+'</td></tr>';
         } else if (type === 'orders') {
             var sb='';
-            if(row.order_status=='Approved') sb='<span style="color:#059669;font-weight:500">อนมตแลว</span>';
-            else if(row.order_status=='Pending') sb='<span style="color:#d97706;font-weight:500">รอดำเนนการ</span>';
-            else if(row.order_status=='Rejected') sb='<span style="color:#dc2626;font-weight:500">ถกปฏเสธ</span>';
-            else if(row.order_status=='Received') sb='<span style="color:#0284c7;font-weight:500">ไดรบเครดตแลว</span>';
+            if(row.order_status=='Approved') sb='<span style="color:#059669;font-weight:500">อนุมัติแล้ว</span>';
+            else if(row.order_status=='Pending') sb='<span style="color:#d97706;font-weight:500">รอดำเนินการ</span>';
+            else if(row.order_status=='Rejected') sb='<span style="color:#dc2626;font-weight:500">ถูกปฏิเสธ</span>';
+            else if(row.order_status=='Received') sb='<span style="color:#0284c7;font-weight:500">ได้รับเครดิตแล้ว</span>';
             var oid = row.order_number ? row.order_number : '#'+String(row.order_id).padStart(5,'0');
             rows += '<tr><td>'+formatThaiDate(row.order_date)+'</td><td style="color:#0284c7">Purchase</td>'
                 +'<td>'+oid+' / '+row.agent_name+'</td>'
@@ -398,7 +398,7 @@ function renderPage(page) {
         }
     });
 
-    document.getElementById('tableBody').innerHTML = rows || '<tr><td colspan="5" class="text-center text-muted p-4">ไมพบขอมล</td></tr>';
+    document.getElementById('tableBody').innerHTML = rows || '<tr><td colspan="5" class="text-center text-muted p-4">ไม่พบข้อมูล</td></tr>';
     renderPagination(_curPage, totalPages, _allData.length);
 }
 
@@ -438,7 +438,7 @@ function renderPagination(page, totalPages, totalItems) {
 
     var info = document.createElement('span');
     info.className = 'page-info';
-    info.textContent = 'แสดง '+startItem+''+endItem+' จาก '+totalItems+' รายการ';
+    info.textContent = 'แสดง '+startItem+'-'+endItem+' จาก '+totalItems+' รายการ';
     container.appendChild(info);
 }
 
@@ -462,8 +462,8 @@ function exportCSV() {
 
 function exportPDF() {
     var tBody = document.getElementById('tableBody').textContent || '';
-    if (tBody.indexOf('ไมพบขอมล')>=0 || tBody.indexOf('กำลงโหลดขอมล')>=0) {
-        Swal.fire('ประมวลผลไมสำเรจ','ไมมขอมลสำหรบสรางเอกสาร PDF โปรดกดดรายงานกอน','warning');
+    if (tBody.indexOf('ไม่พบข้อมูล')>=0 || tBody.indexOf('กำลังประมวลผล')>=0 || tBody.indexOf('กำลังโหลดข้อมูล')>=0) {
+        Swal.fire('ประมวลผลไม่สำเร็จ','ไม่มีข้อมูลสำหรับสร้างเอกสาร PDF โปรดกดดูรายงานก่อน','warning');
         return;
     }
     window.print();
