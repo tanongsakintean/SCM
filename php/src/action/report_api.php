@@ -133,10 +133,10 @@ if ($report_type == 'sales') {
 // REPORT: LOGS (System Activity)
 // ---------------------------------------------------------
 } elseif ($report_type == 'logs') {
-    $sql = "SELECT l.log_id, l.created_at, l.action, l.details, u.firstname, u.lastname, l.ip_address 
+    $sql = "SELECT l.log_id, l.timestamp, l.action, l.details, u.firstname, u.lastname, l.ip_address 
             FROM system_log l 
             JOIN user u ON l.user_id = u.user_id 
-            WHERE DATE(l.created_at) BETWEEN ? AND ? ";
+            WHERE DATE(l.timestamp) BETWEEN ? AND ? ";
     
     $params[] = $start_date;
     $params[] = $end_date;
@@ -148,7 +148,7 @@ if ($report_type == 'sales') {
         $types .= "i";
     }
 
-    $sql .= " ORDER BY l.created_at DESC";
+    $sql .= " ORDER BY l.timestamp DESC";
 } else {
     echo json_encode(['error' => 'Invalid report type']);
     exit();

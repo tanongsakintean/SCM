@@ -12,7 +12,7 @@ $currentPage = $_GET['p'] ?? 'dashboard';
 <div class="sidebar">
     <div class="sidebar-header">
         <div class="brand-logo-html">
-            <img src="assets/img/jp_logo1.png" class="logo-icon" width="56" height="56" alt="JP Logo" />
+            <img src="assets/img/image.png" class="logo-icon" width="70" height="70" alt="JP Logo" />
             <div class="logo-text">JP Digital Agency</div>
         </div>
         <!-- SMS

@@ -195,10 +195,10 @@ if ($report_type == 'sales') {
     // Header Row
     fputcsv($output, ['Log ID', 'Timestamp', 'User', 'Action', 'Details', 'IP Address'], ',', '"', '\\');
 
-    $sql = "SELECT l.log_id, l.created_at, CONCAT(u.firstname, ' ', u.lastname) as user_name, l.action, l.details, l.ip_address 
+    $sql = "SELECT l.log_id, l.timestamp, CONCAT(u.firstname, ' ', u.lastname) as user_name, l.action, l.details, l.ip_address 
             FROM system_log l 
             JOIN user u ON l.user_id = u.user_id 
-            WHERE DATE(l.created_at) BETWEEN ? AND ? ";
+            WHERE DATE(l.timestamp) BETWEEN ? AND ? ";
     
     $params = [$start_date, $end_date];
     $types = "ss";
@@ -208,7 +208,7 @@ if ($report_type == 'sales') {
         $params[] = $filter_user;
         $types .= "i";
     }
-    $sql .= " ORDER BY l.created_at DESC";
+    $sql .= " ORDER BY l.timestamp DESC";
 
     $stmt = $conn->prepare($sql);
     $stmt->bind_param($types, ...$params);
