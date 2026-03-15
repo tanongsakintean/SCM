@@ -11,11 +11,16 @@ if (!has_permission($role_id, 'approve_orders')) {
 
 $order_id = isset($_POST['order_id']) ? intval($_POST['order_id']) : 0;
 if ($order_id > 0) {
-    $stmt = $conn->prepare("UPDATE purchase_credit SET order_status = 'Approved' WHERE order_id = ?");
-    $stmt->bind_param('i', $order_id);
+    $stmt = $conn->prepare("UPDATE purchase_credit SET order_status = ? WHERE order_id = ?");
+    $stmt->bind_param('si', $_REQUEST["action"], $order_id);
     if ($stmt->execute()) {
         // redirect back with flag for SweetAlert
-        header('Location: ../index.php?p=orders&success_approve=1');
+        if($_REQUEST['action'] == 'Approved'){
+            $msg = "อนุมัติคำสั่งซื้อสำเร็จ";
+        }else if($_REQUEST['action'] == 'Rejected'){
+            $msg = "ปฏิเสธคำสั่งซื้อสำเร็จ";
+        }
+        header('Location: ../index.php?p=orders&success_approve=1&msg='.$msg);
         exit;
     }
 }

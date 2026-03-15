@@ -169,7 +169,7 @@ $agents_res = $conn->query("SELECT agent_id, agent_name FROM agent ORDER BY agen
     <div class="report-filters">
         <div class="row align-items-end mb-3">
             <div class="col-md-3 mb-3">
-                <div class="filter-label active"><span class="radio-dot"></span> เลือกประเภทธุรกรรม</div>
+                <div class="filter-label active"></span> เลือกประเภทธุรกรรม</div>
                 <select id="reportType" class="custom-select" onchange="toggleFilterFields()">
                     <option value="sales">รายงานการขาย</option>
                     <option value="orders">รายงานการสั่งซื้อ</option>

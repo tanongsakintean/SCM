@@ -17,6 +17,9 @@ $can_view_all = has_permission($role_id, 'users'); // Only Admins can see Users,
 $report_type = $_GET['type'] ?? 'sales';
 $start_date = $_GET['start_date'] ?? date('Y-m-01');
 $end_date = $_GET['end_date'] ?? date('Y-m-d');
+$filter_user = $_GET['user_id'] ?? '';
+$filter_customer = $_GET['customer_id'] ?? '';
+$filter_agent = $_GET['agent_id'] ?? '';
 
 // Ensure $role is defined to avoid "Undefined variable $role"
 if (!isset($role)) {

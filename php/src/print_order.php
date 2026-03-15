@@ -60,7 +60,7 @@ function BahtText($num){
         }elseif(($kaNumWord[$i]==2 && $i==0) || ($kaNumWord[$i]==2 && $i==6)){
             $returnNumWord.= "สอง";
         }elseif(($kaNumWord[$i]==1 && $i==0) || ($kaNumWord[$i]==1 && $i==6)){
-            if($lenNumber==1){
+            if(($i==0 && $lenNumber==1) || ($i==6 && $lenNumber==7)){
                 $returnNumWord.= "หนึ่ง";
             }else{
                 $returnNumWord.= "เอ็ด";

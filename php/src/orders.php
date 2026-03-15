@@ -605,7 +605,7 @@ if (urlParams.has('success_cancel')) {
     document.addEventListener('DOMContentLoaded', function() {
         Swal.fire({
             icon: 'success',
-            title: 'อนุมัติคำสั่งซื้อเรียบร้อย',
+            title: '<?php echo $_GET['msg'] ?>',
             showConfirmButton: false,
             timer: 1500
         }).then(() => {
